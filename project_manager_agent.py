@@ -3,6 +3,14 @@ from base_agent import BaseAgent
 
 from openai import OpenAI
 
+# Inside project_manager_agent.py or a new file test_agent.py
+import subprocess
+
+def run_tests(test_file: str):
+    result = subprocess.run(["pytest", test_file], capture_output=True, text=True)
+    return result.stdout
+
+
 client = OpenAI(base_url="http://localhost:1234/v1", api_key="lm-studio")
 
 class ProjectManagerAgent(BaseAgent):

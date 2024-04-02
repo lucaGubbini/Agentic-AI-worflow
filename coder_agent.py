@@ -22,3 +22,18 @@ class CoderAgent(BaseAgent):
         )
         # Return the content of the message directly
         return completion.choices[0].message.content
+
+
+# Inside coder_agent.py
+import asyncio
+
+class CoderAgent(BaseAgent):
+    async def generate_code_and_write_to_file(self, task_description: str, filename: str) -> str:
+        # Generate code as before
+        generated_code = "def rectangle_area(length, width):\n    return length * width"
+        
+        # Write the generated code to a file
+        with open(filename, 'w') as file:
+            file.write(generated_code)
+        
+        return filename
