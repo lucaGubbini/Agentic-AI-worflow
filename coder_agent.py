@@ -11,11 +11,14 @@ class CoderAgent(BaseAgent):
         super().__init__(name)
         self.client = OpenAI(base_url="http://localhost:1234/v1", api_key="dummy")
 
-    async def generate_code(self, prompt: str) -> str:
+    async def generate_code(self, task_description: str) -> str:
         completion = self.client.chat.completions.create(
-            model="local-model",
-            messages=[{"role": "system", "content": "Generate Python code for the following task."},
-                      {"role": "user", "content": prompt}],
-            temperature=0.7
+            model="mistral instruct v0 2 7B Q8_0 ggpu",  # replace with your actual model name
+            messages=[
+                {"role": "system", "content": "Generate concise Python code for the task without additional comments."},
+                {"role": "user", "content": task_description}
+            ],
+            temperature=0.3  # Lower temperature encourages more straightforward responses
         )
-        return completion.choices[0].message
+        # Return the content of the message directly
+        return completion.choices[0].message.content

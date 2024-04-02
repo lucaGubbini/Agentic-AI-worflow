@@ -9,13 +9,16 @@ client = OpenAI(base_url="http://localhost:1234/v1", api_key="lm-studio")
 class ReviewerAgent(BaseAgent):
     def __init__(self, name: str):
         super().__init__(name)
-        self.client = OpenAI(base_url="http://localhost:1234/v1", api_key="dummy")
+        self.client = OpenAI(base_url="http://localhost:1234/v1", api_key="lm-studio")
 
-    async def review_code(self, code: str) -> str:
+    async def review_code(self, code_snippet: str) -> str:
         completion = self.client.chat.completions.create(
-            model="local-model",
-            messages=[{"role": "system", "content": "Review the following Python code for best practices and suggest improvements."},
-                      {"role": "user", "content": code}],
-            temperature=0.7
+            model="mistral instruct v0 2 7B Q8_0 ggpu",  # replace with your actual model name
+            messages=[
+                {"role": "system", "content": "Review the Python code focusing on code quality, performance, and security. Only mention comments if they are misused or necessary for understanding complex logic."},
+                {"role": "user", "content": code_snippet}
+            ],
+            temperature=0.5
         )
-        return completion.choices[0].message
+        # Return the content of the message directly
+        return completion.choices[0].message.content

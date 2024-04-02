@@ -1,0 +1,9 @@
+
+def add_two_numbers(x, y):
+    """
+    Adds two numbers
+    :param x: int or float number
+    :param y: int or float number
+    :return: sum of numbers x and y
+    """
+    return x + y

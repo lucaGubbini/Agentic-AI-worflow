@@ -8,13 +8,16 @@ client = OpenAI(base_url="http://localhost:1234/v1", api_key="lm-studio")
 class ProjectManagerAgent(BaseAgent):
     def __init__(self, name: str):
         super().__init__(name)
-        self.client = OpenAI(base_url="http://localhost:1234/v1", api_key="dummy")
+        self.client = OpenAI(base_url="http://localhost:1234/v1", api_key="lm-studio")
 
-    async def generate_project_plan(self, description: str) -> str:
+    async def generate_project_plan(self, project_description: str) -> str:
         completion = self.client.chat.completions.create(
-            model="local-model",
-            messages=[{"role": "system", "content": "Create a detailed project plan based on the following description."},
-                      {"role": "user", "content": description}],
-            temperature=0.7
+            model="mistral instruct v0 2 7B Q8_0 ggpu",  # replace with your actual model name
+            messages=[
+                {"role": "system", "content": "Create a succinct project plan based on the description, avoiding any unnecessary details."},
+                {"role": "user", "content": project_description}
+            ],
+            temperature=0.5
         )
-        return completion.choices[0].message
+        # Return the content of the message directly
+        return completion.choices[0].message.content

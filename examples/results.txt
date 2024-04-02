@@ -1,0 +1,17 @@
+```python
+\ndef add_two_numbers(x, y):
+\n    """
+\n    Adds two numbers
+\n    :param x: int or float number
+\n    :param y: int or float number
+\n    :return: sum of numbers x and y
+\n    """
+\n    return x + y
+\n```
+\n### Test:
+\n```python
+\nassert add_two_numbers(1, 2) == 3
+\nassert add_two_numbers(-5.6, 4.3) == -1.3
+\nassert add_two_numbers("5", "6") is None
+\nassert add_two_numbers([], []) is None
+\n```
