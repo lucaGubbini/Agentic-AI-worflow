@@ -1,24 +1,37 @@
-# reviewer_agent.py
+import aiohttp
 from base_agent import BaseAgent
 
-from openai import OpenAI
-
-client = OpenAI(base_url="http://localhost:1234/v1", api_key="lm-studio")
-
-
 class ReviewerAgent(BaseAgent):
-    def __init__(self, name: str):
+    def __init__(self, name: str, api_base_url: str, api_key: str):
         super().__init__(name)
-        self.client = OpenAI(base_url="http://localhost:1234/v1", api_key="lm-studio")
+        self.api_base_url = api_base_url
+        self.api_key = api_key
 
-    async def review_code(self, code_snippet: str) -> str:
-        completion = self.client.chat.completions.create(
-            model="mistral instruct v0 2 7B Q8_0 ggpu",  # replace with your actual model name
-            messages=[
-                {"role": "system", "content": "Review the Python code focusing on code quality, performance, and security. Only mention comments if they are misused or necessary for understanding complex logic. Ensure the code follows best practices. Ensure that there are no syntax errors."},
-                {"role": "user", "content": code_snippet}
-            ],
-            temperature=0.5
-        )
-        # Return the content of the message directly
-        return completion.choices[0].message.content
+    async def perform_task(self, task: dict):
+        # Extract the 'code' from the task dict
+        code = task.get('code')
+        if not code:
+            raise ValueError("Task does not contain 'code' key")
+        review_results = await self.review_code(code)
+        return {
+            'feedback': review_results.get('feedback', 'No feedback provided.'),
+            'suggestions': review_results.get('suggestions', [])
+        }
+
+    async def review_code(self, code: str) -> dict:
+        """Review the provided code using an external service or internally developed criteria."""
+        # This method should asynchronously communicate with an external service or run internal checks.
+        # The following is a placeholder for such an implementation.
+        print(f"Reviewing code: {code[:30]}...")
+        # Placeholder response simulating an external service's code review
+        return {
+            'feedback': 'Looks good with minor suggestions.',
+            'suggestions': ['Consider adding more comments for clarity.']
+        }
+
+    async def suggest_improvements(self, code: str) -> str:
+        """Generate suggestions for code improvement based on the review."""
+        review_results = await self.review_code(code)
+        suggestions = "\n".join([f"Suggestion: {issue}" for issue in review_results.get('suggestions', [])])
+        return suggestions if suggestions else "No suggestions. Good to go!"
+

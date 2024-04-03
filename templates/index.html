@@ -5,74 +5,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Code Generator</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-
-        #result {
-            white-space: pre-wrap;
-            background-color: #f4f4f4;
-            padding: 10px;
-            margin-top: 20px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-
-        textarea {
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        button {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #0056b3;
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 
-<body>
-    <h2>AI Code Generator</h2>
-    <form id="promptForm">
-        <label for="prompt">Enter your task description:</label><br>
-        <textarea id="prompt" name="prompt" rows="4"></textarea><br>
-        <button type="button" id="generateCode">Generate Code</button>
-    </form>
-    <h3>Generated Code:</h3>
-    <pre id="result"></pre>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4">
+        <h1 class="text-xl font-bold text-center my-5">AI Code Generator</h1>
+        <div id="alertBox" class="hidden text-center py-4 mb-4 text-red-500"></div>
+        <div>
+            <textarea id="prompt" rows="4" class="w-full p-2 border rounded"></textarea>
+            <button id="generateCode"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-3">Generate Code</button>
+        </div>
+        <pre id="result" class="bg-gray-200 p-3 rounded mt-5 hidden"></pre>
+    </div>
 
     <script>
-        document.getElementById('generateCode').addEventListener('click', function () {
-            var prompt = document.getElementById('prompt').value;
-            fetch('http://127.0.0.1:8000/generate-code', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ prompt: prompt }),
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    document.getElementById('result').textContent = data.code;
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
-                    document.getElementById('result').textContent = 'Failed to generate code. Please try again.';
+        document.getElementById('generateCode').addEventListener('click', async () => {
+            const prompt = document.getElementById('prompt').value;
+            if (!prompt) {
+                document.getElementById('alertBox').classList.remove('hidden');
+                document.getElementById('alertBox').innerText = 'Please enter a task description.';
+                return;
+            }
+            document.getElementById('alertBox').classList.add('hidden');
+            document.getElementById('result').classList.add('hidden');
+
+            try {
+                const response = await fetch('/generate-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
                 });
+
+                if (!response.ok) throw new Error('Failed to generate code.');
+                const data = await response.json();
+
+                document.getElementById('result').classList.remove('hidden');
+                document.getElementById('result').textContent = data.code || 'No code generated.';
+            } catch (error) {
+                document.getElementById('alertBox').classList.remove('hidden');
+                document.getElementById('alertBox').innerText = error.message;
+            }
         });
     </script>
 </body>
