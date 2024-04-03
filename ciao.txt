@@ -1,0 +1,8 @@
+@echo off
+call C:\Luca\AI\autogen\esperimenti\0.1\autogenGrimoire\Scripts\activate
+set FLASK_APP=app.py
+set FLASK_ENV=development
+flask run --port=8000
+
+
+make a simple code for calculating the area of a rectangle in python

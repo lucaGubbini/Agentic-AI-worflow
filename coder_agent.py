@@ -1,39 +1,24 @@
-# coder_agent.py
 from base_agent import BaseAgent
-
 from openai import OpenAI
-
-client = OpenAI(base_url="http://localhost:1234/v1", api_key="lm-studio")
-
 
 class CoderAgent(BaseAgent):
     def __init__(self, name: str):
         super().__init__(name)
-        self.client = OpenAI(base_url="http://localhost:1234/v1", api_key="dummy")
+        # Initialize the OpenAI client with the specified base URL and API key
+        self.client = OpenAI(base_url="http://localhost:1234/v1", api_key="lm-studio")
 
-    async def generate_code(self, task_description: str) -> str:
+    async def generate_code(self, project_plan: str) -> str:
+        """
+        Generates code based on the project plan by querying an AI model.
+        """
+        # Use the OpenAI client to make a request to the chat completion endpoint
         completion = self.client.chat.completions.create(
-            model="mistral instruct v0 2 7B Q8_0 ggpu",  # replace with your actual model name
+            model="mistral instruct v0 2 7B Q8_0 ggpu",  # Adjust with the actual model name
             messages=[
-                {"role": "system", "content": "Generate concise Python code for the task without additional comments."},
-                {"role": "user", "content": task_description}
+                {"role": "system", "content": "Generate a code snippet based on the project plan."},
+                {"role": "user", "content": project_plan}
             ],
-            temperature=0.3  # Lower temperature encourages more straightforward responses
+            temperature=0.5
         )
-        # Return the content of the message directly
+        # Return the generated code snippet from the completion response
         return completion.choices[0].message.content
-
-
-# Inside coder_agent.py
-import asyncio
-
-class CoderAgent(BaseAgent):
-    async def generate_code_and_write_to_file(self, task_description: str, filename: str) -> str:
-        # Generate code as before
-        generated_code = "def rectangle_area(length, width):\n    return length * width"
-        
-        # Write the generated code to a file
-        with open(filename, 'w') as file:
-            file.write(generated_code)
-        
-        return filename
