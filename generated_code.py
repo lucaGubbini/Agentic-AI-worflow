@@ -1,4 +1,4 @@
-python
+#python
 # Function to calculate the area of a rectangle
 def rectangle_area(length, width):
     # Calculate and return the area

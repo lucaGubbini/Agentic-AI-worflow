@@ -1,0 +1,3 @@
+[console_scripts]
+memgpt=memgpt.main:app
+
