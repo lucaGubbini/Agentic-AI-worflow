@@ -1,5 +1,5 @@
 @echo off
-call C:\Luca\AI\autogen\esperimenti\0.1\autogenGrimoire\Scripts\activate
+call C:\Luca\AI\autogen\esperimenti\0.2 CrewAI\autogenGrimoire\Scripts\activate
 set FLASK_APP=app.py
 set FLASK_ENV=development
 flask run --port=8000
@@ -10,3 +10,5 @@ make a simple code for calculating the area of a rectangle in python
 TheBloke/Mistral-7B-Instruct-v0.2-GGUF/mistral 7b instruct v0.2 Q8_0 gguf
 
 mistral 7b instruct v0.2 Q8_0 gguf
+
+C:\Luca\AI\autogen\esperimenti\0.2 CrewAI\autogenGrimoire\Scripts\activate
