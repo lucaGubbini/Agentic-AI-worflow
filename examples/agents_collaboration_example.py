@@ -1,36 +1,43 @@
-import sys
-import os
 import asyncio
+import aiohttp
 from project_manager_agent import ProjectManagerAgent
 from coder_agent import CoderAgent
 from reviewer_agent import ReviewerAgent
-
-# Append the parent directory to sys.path to import the upper-level modules
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from CustomLMStudioAdapter import CustomLMStudioAdapter
 
 async def main():
-    # Initialize agents with corrected parameters
-    project_manager = ProjectManagerAgent("Project Manager", "http://localhost:1234/v1", "lm-studio")
-    coder = CoderAgent("Coder", "http://localhost:1234/v1", "lm-studio", "http://localhost:1234/v1")
-    reviewer = ReviewerAgent("Reviewer", "http://localhost:1234/v1", "lm-studio")
+    async with aiohttp.ClientSession() as session:
+        # Initialize the CustomLMStudioAdapter with necessary configurations
+        custom_lm_studio_adapter = CustomLMStudioAdapter(api_key="lm-studio", session=session)
 
-    project_description = "Define a Python function to calculate the area of a rectangle. Comment all non-essential lines."
-    project_plan = await project_manager.generate_project_plan(project_description)
+        # Initialize your agents with the shared aiohttp.ClientSession
+        project_manager = ProjectManagerAgent("Project Manager", "http://localhost:1234/v11", "lm-studio", session)
+        coder = CoderAgent("Coder", "http://localhost:1234/v1", "lm-studio", session, custom_lm_studio_adapter)
+        reviewer = ReviewerAgent("Reviewer", "http://localhost:1234/v1", "lm-studio", session)
 
-    # Assuming perform_task is correctly implemented in CoderAgent
-    task = {'project_plan': project_plan}
-    code = await coder.perform_task(task)
-    print(f"Developed Code:\n{code}")
+        # Example project description
+        project_description = "Define a Python function to calculate the area of a rectangle."
 
-    review_results = await reviewer.perform_task({'code': code})
-    print(f"Code Review: {review_results}")
+        # Generate project plan
+        project_plan = await project_manager.generate_project_plan(project_description)
+        if not project_plan:
+            print("Failed to generate project plan.")
+            return
 
-    # Generate suggestions for improvements if there are issues.
-    if 'issues' in review_results and review_results['issues']:
-        suggestions = await reviewer.suggest_improvements(code)
-        print("Suggestions for improvement:\n", suggestions)
-    else:
-        print("No suggestions for improvement. The code meets the quality standards.")
+        # Generate code based on the project plan
+        code = await coder.generate_code(project_plan)
+        if not code:
+            print("Failed to generate code.")
+            return
 
+        print(f"Generated Code:\n{code}")
+
+        # Review the generated code
+        review_results = await reviewer.review_code(code)
+        print(f"Code Review Results:\n{review_results}")
+
+        # Optionally: Execute additional steps, like testing the code
+
+# Run the main function
 if __name__ == "__main__":
     asyncio.run(main())

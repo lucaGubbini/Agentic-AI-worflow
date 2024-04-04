@@ -1,5 +1,5 @@
 @echo off
-call C:\Luca\AI\autogen\esperimenti\0.2 CrewAI\autogenGrimoire\Scripts\activate
+call C:\Luca\AI\autogen\esperimenti\0.2 CrewAI\autogenVenv\Scripts\activate
 set FLASK_APP=app.py
 set FLASK_ENV=development
 flask run --port=8000

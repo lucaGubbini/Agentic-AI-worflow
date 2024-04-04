@@ -1,25 +1,18 @@
-from quart import Quart, request, jsonify, render_template, abort
-import os
+from quart import Quart, request, jsonify, render_template
 import logging
-from coder_agent import CoderAgent
-from project_manager_agent import ProjectManagerAgent
-from reviewer_agent import ReviewerAgent
+from openai import OpenAI
+import asyncio
 
-# Initialize Quart app
 app = Quart(__name__)
-
-# Setup logging
 logging.basicConfig(level=logging.INFO)
 
-# Load environment variables for API configuration
-API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:1234/v1")
-API_KEY = os.getenv("API_KEY", "lm-studio")
-TESTING_SERVICE_URL = os.getenv("TESTING_SERVICE_URL", "http://localhost:1234/v1")
+# Configuration for the LM-Studio server
+LM_STUDIO_BASE_URL = "http://localhost:1234/v1"
+LM_STUDIO_API_KEY = "lm-studio"
+MODEL = "TheBloke/Mistral-7B-Instruct-v0.2-GGUF/mistral-7b-instruct-v0.2.Q8_0.gguf"
 
-# Initialize agents
-project_manager = ProjectManagerAgent("Project Manager", API_BASE_URL, API_KEY)
-coder = CoderAgent("Coder", API_BASE_URL, API_KEY, TESTING_SERVICE_URL)
-reviewer = ReviewerAgent("Reviewer", API_BASE_URL, API_KEY)
+# Initialize OpenAI client for LM-Studio
+client = OpenAI(base_url=LM_STUDIO_BASE_URL, api_key=LM_STUDIO_API_KEY)
 
 @app.route('/')
 async def home():
@@ -28,31 +21,34 @@ async def home():
 @app.route('/generate-code', methods=['POST'])
 async def generate_code():
     data = await request.get_json()
-    project_description = data.get('prompt', '')
+    project_description = data.get('description', '')
 
     if not project_description:
-        # Returning an error response if the project description is missing.
-        app.logger.error('Prompt is required for project plan generation.')
-        return jsonify({'error': 'Prompt is required for project plan generation.'}), 400
+        return jsonify({'error': 'Project description is required.'}), 400
 
     try:
-        project_plan = await project_manager.generate_project_plan(project_description)
-        
-        if not project_plan:
-            # Handling the case where a project plan cannot be generated.
-            app.logger.error('Failed to generate a project plan.')
-            return jsonify({'error': 'Failed to generate a project plan.'}), 500
-        
-        task = {'project_plan': project_plan}
-        code = await coder.perform_task(task)
-        
-        # Ensure to return a response even if code generation was not successful.
-        return jsonify({'code': code}), 200
+        completion = await asyncio.to_thread(
+            client.chat.completions.create,
+            model=MODEL,
+            messages=[
+                {"role": "system", "content": "Generate a code based on the following project description."},
+                {"role": "user", "content": project_description}
+            ],
+            temperature=0.7
+        )
+
+        # Extract the assistant's response from the completion object
+        if completion.choices and completion.choices[0].message:
+            assistant_message = completion.choices[0].message.content
+        else:
+            assistant_message = "No response generated."
+
+        # Return the extracted message as part of the JSON response
+        return jsonify({'code': assistant_message}), 200
 
     except Exception as e:
-        app.logger.error(f'An unexpected error occurred: {e}')
-        return jsonify({'error': 'Failed to generate code due to an internal error.'}), 500
-
+        logging.error(f"An unexpected error occurred: {str(e)}")
+        return jsonify({'error': 'An unexpected error occurred.'}), 500
 
 
 @app.errorhandler(404)
