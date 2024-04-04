@@ -4,32 +4,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Code Generator</title>
+    <title>AI Code Generator Chat Interface</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #1A202C;
+        }
+
+        .chat-container {
+            max-width: 640px;
+            margin: auto;
+            padding: 20px;
+            background-color: #2D3748;
+        }
+
+        .chat-message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #4A5568;
+            color: white;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            text-align: left;
+        }
+
+        .ai-message {
+            white-space: pre-wrap;
+        }
+
+        .code-container {
+            position: relative;
+            background-color: #2D3748;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .copy-button {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background-color: #4A5568;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        .chat-input {
+            background-color: #4A5568;
+            color: white;
+        }
+
+        .chat-input::placeholder {
+            color: #A0AEC0;
+        }
+    </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen flex flex-col justify-center items-center">
-    <div class="container mx-auto px-4">
-        <h1 class="text-3xl font-bold text-center my-5">AI Code Generator</h1>
-        <div id="alertBox" class="text-center py-4 mb-4 text-white bg-red-500 rounded hidden"></div>
-        <div class="w-full max-w-xs">
-            <textarea id="prompt" rows="4"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                placeholder="Enter your project description..."></textarea>
-            <button id="generateCode"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline block w-full mt-3">
-                Generate Code
-            </button>
+<body>
+    <div class="chat-container rounded-lg">
+        <div class="flex justify-between items-center">
+            <svg width="50" height="50" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+                <rect fill="#4A5568" width="50" height="50" rx="8" />
+                <text x="50%" y="50%" fill="white" font-family="Arial, sans-serif" font-size="9" text-anchor="middle"
+                    alignment-baseline="central">AIG</text>
+            </svg>
+            <h1 class="text-xl font-bold text-white my-5">AI Code Generator Chat Interface</h1>
+            <div>
+                <button id="saveChat"
+                    class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2">
+                    Save Chat
+                </button>
+                <button id="newChat"
+                    class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    New Chat
+                </button>
+            </div>
         </div>
-        <pre id="result" class="bg-gray-200 p-3 rounded mt-5 hidden"></pre>
+        <div id="chatHistory" class="mb-4 overflow-auto max-h-96">
+            <!-- Chat history will be dynamically inserted here -->
+        </div>
+        <div id="alertBox" class="text-center py-4 mb-4 text-white bg-red-500 rounded hidden"></div>
+        <textarea id="prompt" rows="2"
+            class="chat-input shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline"
+            placeholder="Enter your project description..."></textarea>
+        <button id="generateCode"
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline block w-full mt-3">
+            Generate Code
+        </button>
     </div>
-
     <script>
         document.getElementById('generateCode').addEventListener('click', async () => {
             const prompt = document.getElementById('prompt').value.trim();
             const alertBox = document.getElementById('alertBox');
-            const resultBox = document.getElementById('result');
+            const chatHistory = document.getElementById('chatHistory');
 
             if (!prompt) {
                 alertBox.innerText = 'Please enter a project description.';
@@ -38,7 +111,7 @@
             }
 
             alertBox.classList.add('hidden');
-            resultBox.classList.add('hidden');
+            appendMessage(prompt, 'user-message');
 
             try {
                 const response = await fetch('/generate-code', {
@@ -53,17 +126,56 @@
                 }
 
                 const data = await response.json();
-
                 if (data.code && data.code.trim()) {
-                    resultBox.textContent = data.code;
-                    resultBox.classList.remove('hidden');
+                    appendMessage(data.code, 'ai-message');
                 } else {
-                    throw new Error('LLM failed to generate any code.');
+                    throw new Error('No code was generated.');
                 }
             } catch (error) {
                 alertBox.innerText = error.message;
                 alertBox.classList.remove('hidden');
+            } finally {
+                document.getElementById('prompt').value = ''; // Clear input after sending
+                chatHistory.scrollTop = chatHistory.scrollHeight; // Scroll to bottom
             }
+        });
+        function appendMessage(text, className) {
+            const message = document.createElement('div');
+            message.classList.add('chat-message', className);
+            if (className === 'ai-message') {
+                const codeContainer = document.createElement('div');
+                codeContainer.classList.add('code-container');
+                const codeText = document.createElement('div');
+                codeText.textContent = text.replace(/\\n/g, '\n').replace(/```/g, '');
+                const copyBtn = document.createElement('button');
+                copyBtn.textContent = 'Copy';
+                copyBtn.classList.add('copy-button');
+                copyBtn.onclick = function () {
+                    navigator.clipboard.writeText(codeText.textContent);
+                };
+                codeContainer.appendChild(codeText);
+                codeContainer.appendChild(copyBtn);
+                message.appendChild(codeContainer);
+            } else {
+                message.textContent = text;
+            }
+            chatHistory.appendChild(message);
+        }
+
+        document.getElementById('saveChat').addEventListener('click', function () {
+            const chatHistory = document.getElementById('chatHistory').innerText;
+            const blob = new Blob([chatHistory], { type: 'text/plain' });
+            const anchor = document.createElement('a');
+            anchor.href = URL.createObjectURL(blob);
+            anchor.download = 'chat_history.txt';
+            anchor.click();
+            URL.revokeObjectURL(anchor.href);
+        });
+
+        document.getElementById('newChat').addEventListener('click', function () {
+            document.getElementById('chatHistory').innerHTML = '';
+            document.getElementById('prompt').value = '';
+            document.getElementById('alertBox').classList.add('hidden');
         });
     </script>
 </body>
