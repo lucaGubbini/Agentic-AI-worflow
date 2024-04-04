@@ -4,12 +4,12 @@ from project_manager_agent import ProjectManagerAgent
 from coder_agent import CoderAgent
 from reviewer_agent import ReviewerAgent
 from CustomLMStudioAdapter import CustomLMStudioAdapter
-
+from commenter_agent import CommenterAgent
 async def main():
     async with aiohttp.ClientSession() as session:
         # Initialize the CustomLMStudioAdapter with necessary configurations
         custom_lm_studio_adapter = CustomLMStudioAdapter(api_key="lm-studio", session=session)
-
+        commenter_agent = CommenterAgent("Python Code Commenter", session)
         # Initialize your agents with the shared aiohttp.ClientSession
         project_manager = ProjectManagerAgent("Project Manager", "http://localhost:1234/v11", "lm-studio", session)
         coder = CoderAgent("Coder", "http://localhost:1234/v1", "lm-studio", session, custom_lm_studio_adapter)
@@ -37,7 +37,10 @@ async def main():
         print(f"Code Review Results:\n{review_results}")
 
         # Optionally: Execute additional steps, like testing the code
-
+        # Assuming 'code' is a string containing your Python code
+        task = {'code': review_results}
+        commented_code = await commenter_agent.perform_task(task)
+        print(f"Commented Code:\n{commented_code}")
 # Run the main function
 if __name__ == "__main__":
     asyncio.run(main())
