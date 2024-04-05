@@ -1,10 +1,11 @@
-import aiohttp
+from abc import ABC, abstractmethod
 
-class BaseAgent:
-    def __init__(self, name: str, session: aiohttp.ClientSession, config: dict = None):
+class BaseAgent(ABC):
+    def __init__(self, name: str, agent=None, config: dict = None):
         self.name = name
-        self.session = session
+        self.agent = agent
         self.config = config or {}
 
+    @abstractmethod
     async def perform_task(self, task: dict):
-        raise NotImplementedError("This method must be implemented by subclasses.")
+        pass

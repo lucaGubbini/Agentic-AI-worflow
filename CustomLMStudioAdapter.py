@@ -5,81 +5,62 @@ class CustomLMStudioAdapter:
         """
         Initialize the CustomLMStudioAdapter with necessary configurations.
         
-        :param api_key: API key for authentication with the external service.
-        :param api_base_url: Base URL of the external code generation service.
+        :param api_key: API key for authentication with the LM Studio service.
+        :param api_base_url: Base URL of the LM Studio API.
         """
         self.api_key = api_key
         self.api_base_url = api_base_url
-        self.session = None
 
-    async def _ensure_session(self):
+    async def _make_request(self, endpoint: str, payload: dict) -> dict:
         """
-        Ensure an aiohttp.ClientSession is available and open.
+        Helper method to make POST requests to the given API endpoint with the specified payload.
+        
+        :param endpoint: The API endpoint to hit.
+        :param payload: The payload for the POST request.
+        :return: The JSON response as a dictionary.
         """
-        if self.session is None:
-            self.session = aiohttp.ClientSession()
+        url = f"{self.api_base_url}/{endpoint}"
+        headers = {"Authorization": f"Bearer {self.api_key}"}
+
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, json=payload, headers=headers) as response:
+                if response.status == 200:
+                    return await response.json()
+                else:
+                    response_text = await response.text()
+                    raise Exception(f"Failed on {endpoint}: {response.status} - {response_text}")
 
     async def generate_code(self, project_description: str) -> str:
         """
-        Generate code based on a given project description.
+        Generate code based on a given project description using the /v1/completions endpoint.
         
         :param project_description: The description of the project for which code needs to be generated.
-        :return: Generated code as a string.
+        :return: Generated code as a string or a message indicating failure.
         """
-        await self._ensure_session()
-        url = f"{self.api_base_url}/generate-code"
-        headers = {"Authorization": f"Bearer {self.api_key}"}
-        payload = {"description": project_description}
+        payload = {
+            "prompt": project_description,  # Your prompt here
+            "max_tokens": 150,  # Specify the max number of tokens to generate
+            "temperature": 0.5,  # Control the randomness of completions
+            "top_p": 1.0,  # Nucleus sampling
+            "frequency_penalty": 0.0,  # Adjust if needed
+            "presence_penalty": 0.0,  # Adjust if needed
+            "stop": ["\n"]  # Stop sequence to end the generation
+        }
+        # Endpoint adjusted to the assumed correct one for generating completions
+        response = await self._make_request("completions", payload)
+        # Parsing the response to extract the generated code
+        if response and "choices" in response and len(response["choices"]) > 0:
+            return response["choices"][0]["text"]
+        else:
+            return "No code generated"
 
-        async with self.session.post(url, json=payload, headers=headers) as response:
-            if response.status == 200:
-                data = await response.json()
-                return data.get('code', 'No code generated')
-            else:
-                raise Exception(f"Failed to generate code: {response.status}")
-
-    async def review_code(self, code: str) -> dict:
-        """
-        Review generated code for quality and standards.
-        
-        :param code: The code snippet to be reviewed.
-        :return: A dictionary containing review results.
-        """
-        await self._ensure_session()
-        url = f"{self.api_base_url}/review-code"
-        headers = {"Authorization": f"Bearer {self.api_key}"}
-        payload = {"code_snippet": code}
-
-        async with self.session.post(url, json=payload, headers=headers) as response:
-            if response.status == 200:
-                data = await response.json()
-                return data
-            else:
-                raise Exception(f"Failed to review code: {response.status}")
-
-    async def test_code(self, code: str) -> dict:
-        """
-        Test the generated code to ensure it meets functional requirements.
-        
-        :param code: The code snippet to be tested.
-        :return: A dictionary containing test results.
-        """
-        await self._ensure_session()
-        url = f"{self.api_base_url}/test-code"
-        headers = {"Authorization": f"Bearer {self.api_key}"}
-        payload = {"code_snippet": code}
-
-        async with self.session.post(url, json=payload, headers=headers) as response:
-            if response.status == 200:
-                data = await response.json()
-                return data
-            else:
-                raise Exception(f"Failed to test code: {response.status}")
-
-    async def close(self):
-        """
-        Close the aiohttp.ClientSession when the adapter is no longer needed.
-        """
-        if self.session:
-            await self.session.close()
-            self.session = None
+# Example usage:
+# Please ensure aiohttp is installed: pip install aiohttp
+# async def main():
+#     adapter = CustomLMStudioAdapter(api_key="your_api_key_here")
+#     code = await adapter.generate_code("Write a Python function to reverse a string.")
+#     print(code)
+#
+# if __name__ == "__main__":
+#     import asyncio
+#     asyncio.run(main())

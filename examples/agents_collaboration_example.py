@@ -1,46 +1,74 @@
 import asyncio
-import aiohttp
-from project_manager_agent import ProjectManagerAgent
-from coder_agent import CoderAgent
-from reviewer_agent import ReviewerAgent
-from CustomLMStudioAdapter import CustomLMStudioAdapter
-from commenter_agent import CommenterAgent
-async def main():
-    async with aiohttp.ClientSession() as session:
-        # Initialize the CustomLMStudioAdapter with necessary configurations
-        custom_lm_studio_adapter = CustomLMStudioAdapter(api_key="lm-studio", session=session)
-        commenter_agent = CommenterAgent("Python Code Commenter", session)
-        # Initialize your agents with the shared aiohttp.ClientSession
-        project_manager = ProjectManagerAgent("Project Manager", "http://localhost:1234/v11", "lm-studio", session)
-        coder = CoderAgent("Coder", "http://localhost:1234/v1", "lm-studio", session, custom_lm_studio_adapter)
-        reviewer = ReviewerAgent("Reviewer", "http://localhost:1234/v1", "lm-studio", session)
+from abc import ABC, abstractmethod
+from CustomMemGPTAdapter import CustomMemGPTAdapter
+# Assuming CustomMemGPTAdapter is implemented in a separate file and imported correctly
 
-        # Example project description
-        project_description = "Define a Python function to calculate the area of a rectangle."
+class BaseAgent(ABC):
+    @abstractmethod
+    async def perform_task(self, task):
+        pass
 
-        # Generate project plan
-        project_plan = await project_manager.generate_project_plan(project_description)
+class ProjectManagerAgent(BaseAgent):
+    async def perform_task(self, task):
+        description = task.get('project_description')
+        if not description:
+            raise ValueError("Project description is missing.")
+        project_plan = f"Project plan based on: {description}"
+        return project_plan
+
+class CoderAgent(BaseAgent):
+    def __init__(self, memgpt_adapter):
+        self.memgpt_adapter = memgpt_adapter
+
+    async def perform_task(self, task):
+        project_plan = task.get('project_plan')
         if not project_plan:
-            print("Failed to generate project plan.")
-            return
+            raise ValueError("Project plan is missing.")
+        code = await self.memgpt_adapter.generate_code(project_plan)
+        return code
 
-        # Generate code based on the project plan
-        code = await coder.generate_code(project_plan)
+class ReviewerAgent(BaseAgent):
+    def __init__(self, memgpt_adapter):
+        self.memgpt_adapter = memgpt_adapter
+
+    async def perform_task(self, task):
+        code = task.get('code')
         if not code:
-            print("Failed to generate code.")
-            return
+            raise ValueError("Code is missing for review.")
+        review_results = f"Reviewed code: {code[:10]}..."
+        return review_results
 
-        print(f"Generated Code:\n{code}")
+class CommenterAgent(BaseAgent):
+    async def perform_task(self, task):
+        code = task.get('code')
+        if not code:
+            raise ValueError("Code is missing for commenting.")
+        commented_code = f"# Commented\n{code}"
+        return commented_code
 
-        # Review the generated code
-        review_results = await reviewer.review_code(code)
-        print(f"Code Review Results:\n{review_results}")
+async def main():
+    # Placeholder for CustomMemGPTAdapter initialization
+    memgpt_adapter = CustomMemGPTAdapter(api_key='your_api_key', base_url='your_base_url')
 
-        # Optionally: Execute additional steps, like testing the code
-        # Assuming 'code' is a string containing your Python code
-        task = {'code': review_results}
-        commented_code = await commenter_agent.perform_task(task)
-        print(f"Commented Code:\n{commented_code}")
-# Run the main function
+    # Initialize agents
+    project_manager = ProjectManagerAgent()
+    coder = CoderAgent(memgpt_adapter)
+    reviewer = ReviewerAgent(memgpt_adapter)
+    commenter = CommenterAgent()
+
+    # Example workflow simulation
+    project_description = "Define a Python function to calculate the area of a rectangle."
+    project_plan = await project_manager.perform_task({'project_description': project_description})
+    print(f"Project Plan: {project_plan}")
+
+    code = await coder.perform_task({'project_plan': project_plan})
+    print(f"Generated Code:\n{code}")
+
+    review_results = await reviewer.perform_task({'code': code})
+    print(f"Review Results: {review_results}")
+
+    commented_code = await commenter.perform_task({'code': code})
+    print(f"Commented Code:\n{commented_code}")
+
 if __name__ == "__main__":
     asyncio.run(main())

@@ -1,18 +1,21 @@
 from quart import Quart, request, jsonify, render_template
 import logging
-from openai import OpenAI
-import asyncio
+import openai  # Import the openai package
 
 app = Quart(__name__)
 logging.basicConfig(level=logging.INFO)
 
-# Configuration for the LM-Studio server
-LM_STUDIO_BASE_URL = "http://localhost:1234/v1"
-LM_STUDIO_API_KEY = "lm-studio"
-MODEL = "TheBloke/Mistral-7B-Instruct-v0.2-GGUF/mistral-7b-instruct-v0.2.Q8_0.gguf"
+# Set the API key and base URL directly on the openai module
+openai.api_key = "lm-studio"
+openai.api_base = "http://localhost:1234/v1"  # Set the OpenAI API base URL to the local server
 
-# Initialize OpenAI client for LM-Studio
-client = OpenAI(base_url=LM_STUDIO_BASE_URL, api_key=LM_STUDIO_API_KEY)
+# CORS decorator to allow cross-origin access to your Quart app
+@app.after_request
+async def add_cors_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+    return response
 
 @app.route('/')
 async def home():
@@ -27,29 +30,19 @@ async def generate_code():
         return jsonify({'error': 'Project description is required.'}), 400
 
     try:
-        completion = await asyncio.to_thread(
-            client.chat.completions.create,
-            model=MODEL,
-            messages=[
-                {"role": "system", "content": "Generate a code based on the following project description."},
-                {"role": "user", "content": project_description}
-            ],
-            temperature=0.7
+        # Use the openai.Completion.create method to interact with the API
+        response = openai.Completion.create(
+            model="TheBloke/Mistral-7B-Instruct-v0.2-GGUF/mistral-7b-instruct-v0.2.Q8_0.gguf",
+            prompt=project_description,
+            temperature=0.7,
+            max_tokens=5000 # You can adjust max_tokens as needed
         )
-
-        # Extract the assistant's response from the completion object
-        if completion.choices and completion.choices[0].message:
-            assistant_message = completion.choices[0].message.content
-        else:
-            assistant_message = "No response generated."
-
-        # Return the extracted message as part of the JSON response
-        return jsonify({'code': assistant_message}), 200
-
-    except Exception as e:
-        logging.error(f"An unexpected error occurred: {str(e)}")
-        return jsonify({'error': 'An unexpected error occurred.'}), 500
-
+        # Extract the generated text from the response
+        generated_text = response['choices'][0]['text'] if response['choices'] else 'No code was generated.'
+        return jsonify({'code': generated_text}), 200
+    except openai.error.OpenAIError as e:
+        logging.error(f"LM Studio server error: {str(e)}")
+        return jsonify({'error': 'Failed to generate code from LM Studio server.'}), 500
 
 @app.errorhandler(404)
 async def page_not_found(e):

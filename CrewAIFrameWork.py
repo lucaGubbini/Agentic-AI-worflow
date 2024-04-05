@@ -6,6 +6,7 @@ from coder_agent import CoderAgent  # Adjust these imports based on your project
 from reviewer_agent import ReviewerAgent
 from tester_agent import TesterAgent
 from CustomLMStudioAdapter import CustomLMStudioAdapter
+from CustomMemGPTAdapter import CustomMemGPTAdapter, memgpt_agent
 
 
 # Update your CrewAI agents
@@ -42,13 +43,15 @@ class CrewAITesterAgent(Agent):
         self.send_result(test_results)
 
 
-# Instantiate the CustomLMStudioAdapter
-custom_lm_studio_adapter = CustomLMStudioAdapter(api_key="lm-studio")
+# Instantiate the CustomMemGPTAdapter with a configured MemGPT agent
+custom_memgpt_adapter = CustomMemGPTAdapter(memgpt_agent)
 
-# Instantiate your agents
-coder_agent = CrewAICoderAgent('Coder', custom_lm_studio_adapter)
-reviewer_agent = CrewAIReviewerAgent('Reviewer', custom_lm_studio_adapter)
-tester_agent = CrewAITesterAgent('Tester', custom_lm_studio_adapter)
+# Instantiate your agents with the new adapter
+coder_agent = CrewAICoderAgent('Coder', custom_memgpt_adapter)
+reviewer_agent = CrewAIReviewerAgent('Reviewer', custom_memgpt_adapter)
+tester_agent = CrewAITesterAgent('Tester', custom_memgpt_adapter)
+
+# Orchestrator code remains the same
 
 # Assuming Orchestrator is correctly defined and implemented
 orchestrator = Orchestrator()
