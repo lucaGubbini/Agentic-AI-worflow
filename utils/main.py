@@ -1,6 +1,6 @@
 import asyncio
 from abc import ABC, abstractmethod
-from CustomMemGPTAdapter import CustomMemGPTAdapter
+from adapters.CustomMemGPTAdapter import CustomMemGPTAdapter
 # Assuming CustomMemGPTAdapter is implemented in a separate file and imported correctly
 
 class BaseAgent(ABC):

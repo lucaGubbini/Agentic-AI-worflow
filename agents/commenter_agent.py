@@ -1,4 +1,4 @@
-from base_agent import BaseAgent
+from .base_agent import BaseAgent
 
 class CommenterAgent(BaseAgent):
     async def perform_task(self, task: dict):

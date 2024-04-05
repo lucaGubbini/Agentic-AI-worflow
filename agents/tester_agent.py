@@ -1,4 +1,4 @@
-from base_agent import BaseAgent
+from .base_agent import BaseAgent
 import asyncio
 import tempfile
 import subprocess

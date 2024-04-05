@@ -2,11 +2,11 @@
 
 # Import necessary libraries and frameworks
 from crewai import Agent, Orchestrator  # Assuming these exist
-from coder_agent import CoderAgent  # Adjust these imports based on your project structure
-from reviewer_agent import ReviewerAgent
-from tester_agent import TesterAgent
-from CustomLMStudioAdapter import CustomLMStudioAdapter
-from CustomMemGPTAdapter import CustomMemGPTAdapter, memgpt_agent
+from agents.coder_agent import CoderAgent  # Adjust these imports based on your project structure
+from agents.reviewer_agent import ReviewerAgent
+from agents.tester_agent import TesterAgent
+from adapters.CustomLMStudioAdapter import CustomLMStudioAdapter
+from adapters.CustomMemGPTAdapter import CustomMemGPTAdapter, memgpt_agent
 
 
 # Update your CrewAI agents
