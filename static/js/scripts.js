@@ -13,6 +13,7 @@ document.getElementById('generateCode').addEventListener('click', async () => {
     appendMessage(prompt, 'user-message');
 
     try {
+        // Note that the endpoint should be updated to your actual server URL
         const response = await fetch('http://localhost:8000/generate-code', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -20,22 +21,16 @@ document.getElementById('generateCode').addEventListener('click', async () => {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to generate code.');
+            throw new Error('Failed to generate code.');
         }
 
         const data = await response.json();
-        if (data.code && data.code.trim()) {
-            appendMessage(data.code, 'ai-message');
-        } else {
-            throw new Error('No code was generated.');
-        }
+        appendMessage(data.code, 'ai-message');
     } catch (error) {
         alertBox.innerText = error.message;
         alertBox.classList.remove('hidden');
     } finally {
-        document.getElementById('prompt').value = '';  // Clear input after sending
-        chatHistory.scrollTop = chatHistory.scrollHeight;  // Scroll to bottom
+        chatHistory.scrollTop = chatHistory.scrollHeight;
     }
 });
 

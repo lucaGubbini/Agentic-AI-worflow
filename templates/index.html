@@ -6,40 +6,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Code Generator Chat Interface</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="../static/css/styles.css" rel="stylesheet">
+    <style>
+        /* Additional styles for resizing and custom needs */
+        .resize-y {
+            resize: vertical;
+            overflow: auto;
+        }
+    </style>
 </head>
 
-<body>
-    <div class="chat-container rounded-lg">
-        <div class="flex justify-between items-center">
-            <svg width="50" height="50" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
-                <rect fill="#4A5568" width="50" height="50" rx="8" />
-                <text x="50%" y="50%" fill="white" font-family="Arial, sans-serif" font-size="9" text-anchor="middle"
-                    alignment-baseline="central">AIG</text>
-            </svg>
-            <h1 class="text-xl font-bold text-white my-5">AI Code Generator Chat Interface</h1>
-            <div>
-                <button id="saveChat"
-                    class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2">
-                    Save Chat
-                </button>
-                <button id="newChat"
-                    class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                    New Chat
-                </button>
+<body class="bg-gray-900 text-white font-sans">
+    <div class="flex justify-center min-h-screen items-center">
+        <div class="w-full max-w-4xl mx-auto p-5 bg-gray-800 shadow-lg rounded-lg">
+            <header class="flex justify-between items-center p-2">
+                <h1 class="text-xl font-bold">AI Code Generator Chat Interface</h1>
+                <div>
+                    <button id="saveChat"
+                        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none mr-2">Save
+                        Chat</button>
+                    <button id="newChat"
+                        class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none">New
+                        Chat</button>
+                </div>
+            </header>
+            <div id="chatHistory" class="overflow-auto max-h-96 resize-y p-3 bg-gray-700 rounded">
+                <!-- Chat history will be dynamically inserted here -->
             </div>
+            <div id="alertBox" class="hidden"></div>
+            <textarea id="prompt" rows="2" class="w-full p-2 bg-gray-700 border border-gray-600 rounded resize-y mt-3"
+                placeholder="Enter your project description..."></textarea>
+            <button id="generateCode"
+                class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none mt-3">Generate
+                Code</button>
         </div>
-        <div id="chatHistory" class="mb-4 overflow-auto max-h-96">
-            <!-- Chat history will be dynamically inserted here -->
-        </div>
-        <div id="alertBox" class="text-center py-4 mb-4 text-white bg-red-500 rounded hidden"></div>
-        <textarea id="prompt" rows="2"
-            class="chat-input shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline"
-            placeholder="Enter your project description..."></textarea>
-        <button id="generateCode"
-            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline block w-full mt-3">
-            Generate Code
-        </button>
     </div>
     <script src="../static/js/scripts.js"></script>
 </body>

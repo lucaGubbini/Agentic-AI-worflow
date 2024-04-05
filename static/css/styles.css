@@ -1,56 +1,26 @@
-body {
-    background-color: #1A202C;
-}
-
 .chat-container {
-    max-width: 640px;
-    margin: auto;
-    padding: 20px;
-    background-color: #2D3748;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    /* Use the full viewport height */
+    padding: 1rem;
+    box-sizing: border-box;
+    /* Include padding in the height calculation */
 }
 
-.chat-message {
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    background-color: #4A5568;
-    color: white;
-    word-wrap: break-word;
+#chatHistory {
+    flex-grow: 1;
+    /* Grow to use available space */
+    overflow: auto;
+    /* Keep overflow content scrollable */
+    margin-bottom: 1rem;
+    /* Space before the input area */
+    /* ... other styles ... */
 }
 
-.user-message {
-    text-align: left;
-}
-
-.ai-message {
-    white-space: pre-wrap;
-}
-
-.code-container {
-    position: relative;
-    background-color: #2D3748;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 10px;
-}
-
-.copy-button {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    background-color: #4A5568;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 5px;
-    cursor: pointer;
-}
-
-.chat-input {
-    background-color: #4A5568;
-    color: white;
-}
-
-.chat-input::placeholder {
-    color: #A0AEC0;
+/* Add to the bottom of your existing styles */
+#prompt,
+#generateCode {
+    flex-shrink: 0;
+    /* Prevent these elements from shrinking */
 }
