@@ -1,68 +1,79 @@
-# Assuming CustomLMStudioAdapter is defined as above
-
 # Import necessary libraries and frameworks
-from crewai import Agent, Orchestrator  # Assuming these exist
-from agents.coder_agent import CoderAgent  # Adjust these imports based on your project structure
+from crewai import Agent, Orchestrator
+from agents.coder_agent import CoderAgent
 from agents.reviewer_agent import ReviewerAgent
 from agents.tester_agent import TesterAgent
 from adapters.CustomLMStudioAdapter import CustomLMStudioAdapter
 from adapters.CustomMemGPTAdapter import CustomMemGPTAdapter, memgpt_agent
 
-
-# Update your CrewAI agents
-class CrewAICoderAgent(Agent):
-    def __init__(self, name, custom_lm_studio_adapter):
+class BaseCrewAIAgent(Agent):
+    """
+    Base class for all CrewAI Agents. Initializes with common adapter and
+    defines the async run method structure.
+    """
+    def __init__(self, name, adapter):
         super().__init__(name)
-        self.custom_lm_studio_adapter = custom_lm_studio_adapter
+        self.adapter = adapter
 
+    async def run(self, task):
+        raise NotImplementedError("Subclasses must implement this method")
+
+class CrewAICoderAgent(BaseCrewAIAgent):
+    """
+    CrewAI Coder Agent for generating code based on task descriptions.
+    """
     async def run(self, task):
         task_description = task.get('description')
-        generated_code = await self.custom_lm_studio_adapter.generate_code(task_description)
+        generated_code = await self.adapter.generate_code(task_description)
         self.send_result(generated_code)
 
-
-class CrewAIReviewerAgent(Agent):
-    def __init__(self, name, custom_lm_studio_adapter):
-        super().__init__(name)
-        self.custom_lm_studio_adapter = custom_lm_studio_adapter
-
+class CrewAIReviewerAgent(BaseCrewAIAgent):
+    """
+    CrewAI Reviewer Agent for reviewing code snippets.
+    """
     async def run(self, task):
         code_snippet = task.get('code_snippet')
-        review = await self.custom_lm_studio_adapter.review_code(code_snippet)
+        review = await self.adapter.review_code(code_snippet)
         self.send_result(review)
 
-
-class CrewAITesterAgent(Agent):
-    def __init__(self, name, custom_lm_studio_adapter):
-        super().__init__(name)
-        self.custom_lm_studio_adapter = custom_lm_studio_adapter
-
+class CrewAITesterAgent(BaseCrewAIAgent):
+    """
+    CrewAI Tester Agent for testing code snippets.
+    """
     async def run(self, task):
         code_snippet = task.get('code_snippet')
-        test_results = await self.custom_lm_studio_adapter.test_code(code_snippet)
+        test_results = await self.adapter.test_code(code_snippet)
         self.send_result(test_results)
 
+def setup_agents():
+    """
+    Setups agents by instantiating them with a CustomMemGPTAdapter and registering
+    them with the orchestrator.
+    """
+    custom_memgpt_adapter = CustomMemGPTAdapter(memgpt_agent)
 
-# Instantiate the CustomMemGPTAdapter with a configured MemGPT agent
-custom_memgpt_adapter = CustomMemGPTAdapter(memgpt_agent)
+    coder_agent = CrewAICoderAgent('Coder', custom_memgpt_adapter)
+    reviewer_agent = CrewAIReviewerAgent('Reviewer', custom_memgpt_adapter)
+    tester_agent = CrewAITesterAgent('Tester', custom_memgpt_adapter)
 
-# Instantiate your agents with the new adapter
-coder_agent = CrewAICoderAgent('Coder', custom_memgpt_adapter)
-reviewer_agent = CrewAIReviewerAgent('Reviewer', custom_memgpt_adapter)
-tester_agent = CrewAITesterAgent('Tester', custom_memgpt_adapter)
+    orchestrator = Orchestrator()
+    orchestrator.register_agent(coder_agent)
+    orchestrator.register_agent(reviewer_agent)
+    orchestrator.register_agent(tester_agent)
 
-# Orchestrator code remains the same
+    return orchestrator
 
-# Assuming Orchestrator is correctly defined and implemented
-orchestrator = Orchestrator()
+def main():
+    """
+    Main function to run the CrewAI Framework setup and assign tasks.
+    """
+    orchestrator = setup_agents()
 
-# Register agents with the Orchestrator
-orchestrator.register_agent(coder_agent)
-orchestrator.register_agent(reviewer_agent)
-orchestrator.register_agent(tester_agent)
+    # Define a task for the CoderAgent and start the workflow
+    task = {
+        'description': 'Write a Python function to calculate Fibonacci numbers.'
+    }
+    orchestrator.assign_task('Coder', task)
 
-# Define a task for the CoderAgent and start the workflow
-task = {
-    'description': 'Write a Python function to calculate Fibonacci numbers.'
-}
-orchestrator.assign_task('Coder', task)
+if __name__ == '__main__':
+    main()

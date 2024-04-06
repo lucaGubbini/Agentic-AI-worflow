@@ -1,74 +1,103 @@
-document.getElementById('generateCode').addEventListener('click', async () => {
-    const prompt = document.getElementById('prompt').value.trim();
-    const alertBox = document.getElementById('alertBox');
-    const chatHistory = document.getElementById('chatHistory');
-
-    if (!prompt) {
-        alertBox.innerText = 'Please enter a project description.';
-        alertBox.classList.remove('hidden');
-        return;
+// Improved scripts.js with enhanced structure, error handling, and modularity
+class ChatInterface {
+    constructor() {
+        this.initEventListeners();
     }
 
-    alertBox.classList.add('hidden');
-    appendMessage(prompt, 'user-message');
+    initEventListeners() {
+        document.getElementById('generateCode').addEventListener('click', () => this.generateCode());
+        document.getElementById('saveChat').addEventListener('click', () => this.saveChatHistory());
+        document.getElementById('newChat').addEventListener('click', () => this.resetChat());
+    }
 
-    try {
-        // Note that the endpoint should be updated to your actual server URL
-        const response = await fetch('http://localhost:8000/generate-code', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ description: prompt })
-        });
+    async generateCode() {
+        const prompt = document.getElementById('prompt').value.trim();
+        if (!prompt) {
+            this.displayAlert('Please enter a project description.');
+            return;
+        }
+        this.clearAlert();
 
-        if (!response.ok) {
-            throw new Error('Failed to generate code.');
+        const message = await this.postDescriptionAndGetCode(prompt);
+        this.appendMessage(message, 'ai-message');
+    }
+
+    async postDescriptionAndGetCode(description) {
+        try {
+            const response = await fetch('http://localhost:8000/generate-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ description })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to generate code. Please try again.');
+            }
+
+            const { code } = await response.json();
+            return code;
+        } catch (error) {
+            this.displayAlert(error.message);
+            return 'Error: Could not retrieve code.';
+        }
+    }
+
+    appendMessage(text, className) {
+        const chatHistory = document.getElementById('chatHistory');
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('chat-message', className);
+        messageDiv.textContent = text;
+        chatHistory.appendChild(messageDiv);
+
+        if (className === 'ai-message') {
+            this.enhanceAIMessage(messageDiv, text);
         }
 
-        const data = await response.json();
-        appendMessage(data.code, 'ai-message');
-    } catch (error) {
-        alertBox.innerText = error.message;
-        alertBox.classList.remove('hidden');
-    } finally {
         chatHistory.scrollTop = chatHistory.scrollHeight;
     }
-});
 
-function appendMessage(text, className) {
-    const message = document.createElement('div');
-    message.classList.add('chat-message', className);
-    if (className === 'ai-message') {
-        const codeContainer = document.createElement('div');
-        codeContainer.classList.add('code-container');
-        const codeText = document.createElement('div');
-        codeText.textContent = text.replace(/\\n/g, '\n').replace(/```/g, '');
-        const copyBtn = document.createElement('button');
-        copyBtn.textContent = 'Copy';
-        copyBtn.classList.add('copy-button');
-        copyBtn.onclick = function () {
-            navigator.clipboard.writeText(codeText.textContent);
-        };
-        codeContainer.appendChild(codeText);
-        codeContainer.appendChild(copyBtn);
-        message.appendChild(codeContainer);
-    } else {
-        message.textContent = text;
+    enhanceAIMessage(messageDiv, code) {
+        const codeContainer = document.createElement('pre');
+        codeContainer.textContent = code;
+        const copyBtn = this.createCopyButton(code);
+        messageDiv.innerHTML = '';
+        messageDiv.appendChild(codeContainer);
+        messageDiv.appendChild(copyBtn);
     }
-    chatHistory.appendChild(message);
+
+    createCopyButton(textToCopy) {
+        const button = document.createElement('button');
+        button.textContent = 'Copy';
+        button.classList.add('copy-button');
+        button.onclick = () => navigator.clipboard.writeText(textToCopy);
+        return button;
+    }
+
+    displayAlert(message) {
+        const alertBox = document.getElementById('alertBox');
+        alertBox.innerText = message;
+        alertBox.classList.remove('hidden');
+    }
+
+    clearAlert() {
+        document.getElementById('alertBox').classList.add('hidden');
+    }
+
+    saveChatHistory() {
+        const chatHistory = document.getElementById('chatHistory').innerText;
+        const blob = new Blob([chatHistory], { type: 'text/plain' });
+        const anchor = document.createElement('a');
+        anchor.href = URL.createObjectURL(blob);
+        anchor.download = 'chat_history.txt';
+        anchor.click();
+        URL.revokeObjectURL(anchor.href);
+    }
+
+    resetChat() {
+        document.getElementById('chatHistory').innerHTML = '';
+        document.getElementById('prompt').value = '';
+        this.clearAlert();
+    }
 }
 
-document.getElementById('saveChat').addEventListener('click', function () {
-    const chatHistory = document.getElementById('chatHistory').innerText;
-    const blob = new Blob([chatHistory], { type: 'text/plain' });
-    const anchor = document.createElement('a');
-    anchor.href = URL.createObjectURL(blob);
-    anchor.download = 'chat_history.txt';
-    anchor.click();
-    URL.revokeObjectURL(anchor.href);
-});
-
-document.getElementById('newChat').addEventListener('click', function () {
-    document.getElementById('chatHistory').innerHTML = '';
-    document.getElementById('prompt').value = '';
-    document.getElementById('alertBox').classList.add('hidden');
-});
+new ChatInterface();

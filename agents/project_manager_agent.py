@@ -1,10 +1,8 @@
 from .base_agent import BaseAgent
-import asyncio
 
 class ProjectManagerAgent(BaseAgent):
-    def __init__(self, name: str, agent):
-        super().__init__(name, agent)
-
+    """Agent responsible for generating project plans based on descriptions."""
+    
     async def perform_task(self, task: dict):
         project_description = task.get('project_description')
         if not project_description:
@@ -14,6 +12,6 @@ class ProjectManagerAgent(BaseAgent):
         return {'project_plan': project_plan}
 
     async def generate_project_plan(self, project_description: str) -> str:
-        # Utilize the MemGPT agent to generate a project plan from the description
+        # Utilize the linked agent to generate a project plan from the description
         response = await self.agent.process_request(project_description)
         return response

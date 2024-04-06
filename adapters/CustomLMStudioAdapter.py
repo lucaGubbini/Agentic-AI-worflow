@@ -1,4 +1,5 @@
 import aiohttp
+from aiohttp import ClientSession
 
 class CustomLMStudioAdapter:
     def __init__(self, api_key: str, api_base_url: str = 'http://localhost:1234/v1'):
@@ -10,6 +11,14 @@ class CustomLMStudioAdapter:
         """
         self.api_key = api_key
         self.api_base_url = api_base_url
+        self.session: ClientSession = None
+
+    async def _ensure_session(self):
+        """
+        Ensure the aiohttp ClientSession is created and reused for each request.
+        """
+        if not self.session or self.session.closed:
+            self.session = ClientSession()
 
     async def _make_request(self, endpoint: str, payload: dict) -> dict:
         """
@@ -19,16 +28,13 @@ class CustomLMStudioAdapter:
         :param payload: The payload for the POST request.
         :return: The JSON response as a dictionary.
         """
+        await self._ensure_session()
         url = f"{self.api_base_url}/{endpoint}"
         headers = {"Authorization": f"Bearer {self.api_key}"}
 
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, json=payload, headers=headers) as response:
-                if response.status == 200:
-                    return await response.json()
-                else:
-                    response_text = await response.text()
-                    raise Exception(f"Failed on {endpoint}: {response.status} - {response_text}")
+        async with self.session.post(url, json=payload, headers=headers) as response:
+            response.raise_for_status()  # This will automatically throw an exception for non-200 responses
+            return await response.json()
 
     async def generate_code(self, project_description: str) -> str:
         """
@@ -38,29 +44,27 @@ class CustomLMStudioAdapter:
         :return: Generated code as a string or a message indicating failure.
         """
         payload = {
-            "prompt": project_description,  # Your prompt here
-            "max_tokens": 150,  # Specify the max number of tokens to generate
-            "temperature": 0.5,  # Control the randomness of completions
-            "top_p": 1.0,  # Nucleus sampling
-            "frequency_penalty": 0.0,  # Adjust if needed
-            "presence_penalty": 0.0,  # Adjust if needed
-            "stop": ["\n"]  # Stop sequence to end the generation
+            "prompt": project_description,
+            "max_tokens": 150,
+            "temperature": 0.5,
+            "top_p": 1.0,
+            "frequency_penalty": 0.0,
+            "presence_penalty": 0.0,
+            "stop": ["\n"]
         }
-        # Endpoint adjusted to the assumed correct one for generating completions
-        response = await self._make_request("completions", payload)
-        # Parsing the response to extract the generated code
-        if response and "choices" in response and len(response["choices"]) > 0:
-            return response["choices"][0]["text"]
-        else:
-            return "No code generated"
+        try:
+            response = await self._make_request("completions", payload)
+            return response["choices"][0]["text"] if response.get("choices") else "No code generated"
+        except aiohttp.ClientResponseError as e:
+            print(f"API request failed: {e.status} - {e.message}")
+            return "API request failed"
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            return "API request failed due to an unexpected error"
 
-# Example usage:
-# Please ensure aiohttp is installed: pip install aiohttp
-# async def main():
-#     adapter = CustomLMStudioAdapter(api_key="your_api_key_here")
-#     code = await adapter.generate_code("Write a Python function to reverse a string.")
-#     print(code)
-#
-# if __name__ == "__main__":
-#     import asyncio
-#     asyncio.run(main())
+    async def close(self):
+        """
+        Close the aiohttp session if it has been opened.
+        """
+        if self.session and not self.session.closed:
+            await self.session.close()

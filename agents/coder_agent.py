@@ -1,6 +1,8 @@
 from .base_agent import BaseAgent
 
 class CoderAgent(BaseAgent):
+    """Agent responsible for generating code based on project plans."""
+    
     async def perform_task(self, task: dict):
         project_plan = task.get('project_plan')
         if not project_plan:
