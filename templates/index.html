@@ -5,41 +5,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Code Generator Chat Interface</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <style>
-        /* Additional styles for resizing and custom needs */
-        .resize-y {
-            resize: vertical;
-            overflow: auto;
-        }
-    </style>
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <!-- Include Tailwind CSS for responsiveness -->
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-gray-900 text-white font-sans">
-    <div class="flex justify-center min-h-screen items-center">
-        <div class="w-full max-w-4xl mx-auto p-5 bg-gray-800 shadow-lg rounded-lg">
-            <header class="flex justify-between items-center p-2">
+    <main class="flex justify-center items-center min-h-screen">
+        <div class="w-full max-w-4xl mx-auto p-5 bg-gray-1920 shadow-lg rounded-lg">
+            <nav class="flex justify-between items-center p-2">
                 <h1 class="text-xl font-bold">AI Code Generator Chat Interface</h1>
+                <span id="statusIndicator" class="text-green-400"></span>
                 <div>
-                    <button id="saveChat"
-                        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none mr-2">Save
-                        Chat</button>
-                    <button id="newChat"
-                        class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none">New
-                        Chat</button>
+                    <button id="saveChat" class="action-btn bg-green-500">Save Chat</button>
+                    <button id="newChat" class="action-btn bg-red-500">New Chat</button>
                 </div>
-            </header>
-            <div id="chatHistory" class="overflow-auto max-h-96 resize-y p-3 bg-gray-700 rounded">
-                <!-- Chat history will be dynamically inserted here -->
-            </div>
-            <div id="alertBox" class="hidden"></div>
-            <textarea id="prompt" rows="2" class="w-full p-2 bg-gray-700 border border-gray-600 rounded resize-y mt-3"
-                placeholder="Enter your project description..."></textarea>
-            <button id="generateCode"
-                class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none mt-3">Generate
-                Code</button>
+            </nav>
+            <section id="chatSection">
+                <div id="chatHistory" class="chat-history overflow-y-auto"></div>
+                <div id="alertBox" class="hidden mt-2"></div>
+                <textarea id="userPrompt" class="input-area" placeholder="Enter your project description..."></textarea>
+                <button id="generateCode" class="submit-btn bg-blue-500">Generate Code</button>
+            </section>
         </div>
-    </div>
+    </main>
     <script src="../static/js/scripts.js"></script>
 </body>
 
