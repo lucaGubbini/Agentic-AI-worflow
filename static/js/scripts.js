@@ -1,13 +1,13 @@
 class ChatInterface {
     constructor() {
-        this.initEventListeners();
+        this.bindEventListeners();
         this.isGeneratingCode = false;
     }
 
-    initEventListeners() {
-        document.getElementById('generateCode').addEventListener('click', () => this.generateCode());
-        document.getElementById('saveChat').addEventListener('click', () => this.saveChatHistory());
-        document.getElementById('newChat').addEventListener('click', () => this.resetChat());
+    bindEventListeners() {
+        document.getElementById('generateCode').addEventListener('click', () => this.handleGenerateCode());
+        document.getElementById('saveChat').addEventListener('click', () => this.handleSaveChat());
+        document.getElementById('newChat').addEventListener('click', () => this.handleNewChat());
         window.addEventListener('load', () => this.adjustChatHeight());
         window.addEventListener('resize', () => this.adjustChatHeight());
     }
@@ -17,39 +17,38 @@ class ChatInterface {
         chatHistory.style.maxHeight = `${window.innerHeight - chatHistory.offsetTop - 60}px`;
     }
 
-    async generateCode() {
-        let prompt = document.getElementById('userPrompt').value.trim();
-        if (!prompt) {
-            // Default prompt if the user input is empty
-            prompt = "make a simple code for calculating the area of a rectangle in python";
-            document.getElementById('userPrompt').value = prompt;
-        }
+    async handleGenerateCode() {
+        const userPrompt = document.getElementById('userPrompt').value.trim();
+        const prompt = userPrompt || "make a simple code for calculating the area of a rectangle in python";
+        if (!userPrompt) document.getElementById('userPrompt').value = prompt;
+
         this.clearAlert();
-        this.setGeneratingCodeStatus(true);
+        this.updateGeneratingCodeStatus(true);
 
-        const message = await this.postDescriptionAndGetCode(prompt);
-        this.appendMessage(prompt, 'user-message');
-        this.appendMessage(message, 'ai-message');
-
-        this.setGeneratingCodeStatus(false);
-    }
-
-    setGeneratingCodeStatus(isGenerating) {
-        this.isGeneratingCode = isGenerating;
-        const statusIndicator = document.getElementById('statusIndicator');
-        if (isGenerating) {
-            statusIndicator.textContent = 'Generating code...';
-        } else {
-            statusIndicator.textContent = '';
+        try {
+            const code = await this.fetchGeneratedCode(prompt);
+            this.appendMessage(prompt, 'user-message');
+            this.appendMessage(code, 'ai-message');
+        } catch (error) {
+            this.displayAlert(error, 'error');
+        } finally {
+            this.updateGeneratingCodeStatus(false);
         }
     }
 
-    async postDescriptionAndGetCode(description) {
+    updateGeneratingCodeStatus(isGenerating) {
+        this.isGeneratingCode = isGenerating;
+        const generateButton = document.getElementById('generateCode');
+        generateButton.textContent = isGenerating ? 'Generating...' : 'Generate Code';
+        generateButton.disabled = isGenerating;
+    }
+
+    async fetchGeneratedCode(description) {
         try {
             const response = await fetch('/generate-code', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ description, sessionId: 'your-session-id' }) // Ensure sessionId is managed appropriately
+                body: JSON.stringify({ description })
             });
 
             if (!response.ok) {
@@ -57,63 +56,42 @@ class ChatInterface {
             }
 
             const data = await response.json();
-            if (data.influencedByDbData) {
-                this.displayAlert('Model used data from the database.', 'success'); // Success message in green
-                // Optionally display database data details
-                console.log('Details:', data.dbDataDetails);
-            }
             return data.code;
         } catch (error) {
-            this.displayAlert(error.message, 'error'); // Error message in red
-            return 'Error: Could not retrieve code.';
+            this.displayAlert(error.message, 'error');
+            throw error;
         }
     }
-
 
     appendMessage(text, className) {
         const chatHistory = document.getElementById('chatHistory');
         const messageDiv = document.createElement('div');
-        messageDiv.classList.add('chat-message', className);
+        messageDiv.className = `message ${className}`;
         messageDiv.textContent = text;
+
         chatHistory.appendChild(messageDiv);
-
-        chatHistory.scrollTop = chatHistory.scrollHeight - chatHistory.clientHeight;
-
-        if (className === 'ai-message' && text.startsWith("``` python")) {
-            messageDiv.innerHTML = '';
-            const code = text.substring(10, text.length - 3); // Extract code
-            const pre = document.createElement('pre');
-            pre.textContent = code;
-            messageDiv.appendChild(pre);
-            messageDiv.appendChild(this.createCopyButton(code));
-        }
+        chatHistory.scrollTop = chatHistory.scrollHeight;
     }
 
-    createCopyButton(textToCopy) {
-        const button = document.createElement('button');
-        button.textContent = 'Copy';
-        button.classList.add('copy-button');
-        button.onclick = () => navigator.clipboard.writeText(textToCopy);
-        return button;
-    }
-
-    displayAlert(message, className) {
+    displayAlert(message, type) {
         const alertBox = document.getElementById('alertBox');
         alertBox.textContent = message;
-        // Remove all alert classes
-        alertBox.classList.remove('alert-success', 'alert-danger', 'alert-warning', 'alert-info');
-        // Add the specified class
-        alertBox.classList.add(className);
+        alertBox.className = `alertBox ${type}`;
+        alertBox.classList.remove('hidden');
+
+        clearTimeout(this.alertTimeout);
+        this.alertTimeout = setTimeout(() => this.clearAlert(), 5000);
     }
-
-
 
     clearAlert() {
-        document.getElementById('alertBox').classList.add('hidden');
+        const alertBox = document.getElementById('alertBox');
+        alertBox.classList.add('hidden');
     }
 
-    async saveChatHistory() {
-        const chatHistory = document.getElementById('chatHistory').innerText;
+    async handleSaveChat() {
+        const chatHistory = Array.from(document.querySelectorAll('.message'))
+            .map(msgDiv => msgDiv.textContent)
+            .join('\n');
         try {
             const response = await fetch('http://localhost:8001/save-chat', {
                 method: 'POST',
@@ -126,21 +104,21 @@ class ChatInterface {
             }
 
             const data = await response.json();
-            // Add 'alert-success' class instead of the previous class (assuming it was 'alert-danger')
-            this.displayAlert(data.message, 'alert-success');
+            this.displayAlert(data.message, 'success');
+            // set allert opacity to 1
+            document.getElementById('alertBox').style.opacity = 1;
         } catch (error) {
-            console.error('Save chat error:', error);
-            // Use the 'alert-danger' class for errors
-            this.displayAlert(error.message, 'alert-danger');
+            this.displayAlert(error.message, 'error');
+            document.getElementById('alertBox').style.opacity = 1;
         }
     }
 
 
-    resetChat() {
+    handleNewChat() {
         document.getElementById('chatHistory').innerHTML = '';
         document.getElementById('userPrompt').value = '';
         this.clearAlert();
     }
 }
 
-new ChatInterface();
+document.addEventListener('DOMContentLoaded', () => new ChatInterface());

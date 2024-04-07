@@ -6,26 +6,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Code Generator Chat Interface</title>
     <link rel="stylesheet" href="../static/css/styles.css">
-    <!-- Include Tailwind CSS for responsiveness -->
-    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-900 text-white font-sans">
-    <main class="flex justify-center items-center min-h-screen">
-        <div class="w-full max-w-4xl mx-auto p-5 bg-gray-1920 shadow-lg rounded-lg">
-            <nav class="flex justify-between items-center p-2">
-                <h1 class="text-xl font-bold">AI Code Generator Chat Interface</h1>
-                <span id="statusIndicator" class="text-green-400"></span>
-                <div>
-                    <button id="saveChat" class="action-btn bg-green-500">Save Chat</button>
-                    <button id="newChat" class="action-btn bg-red-500">New Chat</button>
+<body>
+    <main>
+        <div class="container">
+            <nav class="navbar">
+                <h1>AI Code Generator Chat Interface</h1>
+                <div class="status-section">
+                    <span id="statusIndicator"></span>
+                    <!-- The chat-saved message will be hidden by default and displayed by JS -->
+                    <span id="chatSaved" class="chat-saved hidden">Chat Saved</span>
+                </div>
+                <div class="button-group">
+                    <button id="saveChat" class="button saveChat">Save Chat</button>
+                    <button id="newChat" class="button newChat">New Chat</button>
                 </div>
             </nav>
             <section id="chatSection">
-                <div id="chatHistory" class="chat-history overflow-y-auto"></div>
-                <div id="alertBox" class="hidden mt-2"></div>
-                <textarea id="userPrompt" class="input-area" placeholder="Enter your project description..."></textarea>
-                <button id="generateCode" class="submit-btn bg-blue-500">Generate Code</button>
+                <div id="chatHistory" class="chatHistory">
+                    <!-- Chat bubbles -->
+                    <div class="message ai-message">AI's response...</div>
+                    <div class="message user-message">User's question...</div>
+                </div>
+                <!-- Removed the unwanted "Chat history saved successfully." message here -->
+                <div class="input-section">
+                    <textarea id="userPrompt" class="userPrompt"
+                        placeholder="Enter your project description..."></textarea>
+                    <button id="generateCode" class="button generateCode">Generate Code</button>
+                </div>
+                <div id="alertBox" class="alertBox hidden"></div>
             </section>
         </div>
     </main>

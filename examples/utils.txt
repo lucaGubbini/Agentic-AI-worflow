@@ -5,7 +5,7 @@ set FLASK_ENV=development
 flask run --port=8000
 
 
-make a simple code for calculating the area of a rectangle in python
+make a simple code for calculating the area of a triangle in python 
 
 TheBloke/Mistral-7B-Instruct-v0.2-GGUF/mistral 7b instruct v0.2 Q8_0 gguf
 
