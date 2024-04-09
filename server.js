@@ -92,6 +92,20 @@ app.get('/get-history/:sessionId', async (req, res) => {
     }
 });
 
+app.post('/create-agent', async (req, res) => {
+    try {
+        const agentDetails = req.body;
+        console.log("Received custom agent details: ", agentDetails);
+        // Placeholder for creating the agent in your database or service
+
+        res.json({ message: 'Custom agent created successfully.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while creating the custom agent.' });
+    }
+});
+
+
 const server = app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });

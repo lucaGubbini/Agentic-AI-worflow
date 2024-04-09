@@ -9,7 +9,7 @@ html {
     color: #F9FAFB;
 }
 
-/* Main container styling */
+/* Main Container Styling */
 main {
     display: flex;
     justify-content: center;
@@ -31,7 +31,7 @@ main {
     flex-direction: column;
 }
 
-/* Navigation bar styling */
+/* Navbar Styling */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -42,9 +42,10 @@ main {
 
 .navbar h1 {
     font-size: 1.75rem;
+    color: #F9FAFB;
 }
 
-/* Status section styling */
+/* Status Section Styling */
 .status-section {
     display: flex;
     align-items: center;
@@ -58,16 +59,13 @@ main {
     margin-right: 10px;
 }
 
-/* Chat saved message styling */
+/* Chat Saved Message Styling */
 .chat-saved {
-    display: none;
-    /* Hidden by default, will be shown by JS when chat is saved */
     color: #4ADE80;
-    /* Green text to signify successful action */
     font-size: 0.875rem;
 }
 
-/* Button styling */
+/* Button Styling */
 .button-group {
     display: flex;
     gap: 10px;
@@ -86,7 +84,8 @@ main {
     transform: scale(1.05);
 }
 
-.saveChat {
+.saveChat,
+.generateCode {
     background-color: #22C55E;
 }
 
@@ -94,13 +93,7 @@ main {
     background-color: #EF4444;
 }
 
-.generateCode {
-    background-color: #3B82F6;
-    width: 100%;
-    margin-top: 10px;
-}
-
-/* Chat section styling */
+/* Chat Section Styling */
 #chatSection {
     flex-grow: 1;
     display: flex;
@@ -111,18 +104,15 @@ main {
     flex-grow: 1;
     overflow-y: auto;
     padding: 20px;
+    background-color: #262E38;
 }
 
-/* Chat message bubble styling */
+/* Chat Message Bubble Styling */
 .message {
-    background-color: #262E38;
     padding: 15px;
     border-radius: 16px;
     margin-bottom: 20px;
     max-width: 80%;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    white-space: pre-wrap;
 }
 
 .ai-message {
@@ -135,55 +125,90 @@ main {
     background-color: #2563EB;
 }
 
-/* Input section styling */
-.input-section {
+/* Input Section Styling */
+.input-section,
+.form {
     width: calc(100% - 40px);
-    padding: 0 20px;
+    margin: auto;
     margin-bottom: 20px;
+    padding: 20px;
 }
 
-.userPrompt {
+.userPrompt,
+input[type="text"],
+input[type="number"],
+textarea {
     width: 100%;
     padding: 15px;
     margin-bottom: 10px;
-    border: none;
+    border: 1px solid #ddd;
     border-radius: 6px;
     background-color: #262E38;
     color: #F9FAFB;
+    font-size: 16px;
+    transition: all 0.3s ease-in-out;
 }
 
-/* Alert box styling */
+.userPrompt:focus,
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus {
+    outline: none;
+    border-color: #5C6BC0;
+    box-shadow: 0 0 0 3px rgba(92, 107, 192, 0.5);
+}
+
+/* Button Submission Styling */
+button[type="submit"] {
+    background-color: #5C6BC0;
+    color: white;
+    padding: 15px;
+    border: none;
+    border-radius: 4px;
+    font-size: 18px;
+    margin-top: 20px;
+    transition: background-color 0.3s;
+    width: 100%;
+}
+
+button[type="submit"]:hover {
+    background-color: #3949AB;
+}
+
+/* Alert Box Styling */
 .alertBox {
     margin: 10px 20px;
     border-radius: 4px;
     padding: 10px;
     background-color: #28a745;
-    /* Default to green for successful messages */
     color: white;
-    display: none;
-    /* Hidden by default */
+    animation: fadeOut 5s forwards;
 }
 
 .alertBox.error {
-    opacity: 1;
     background-color: #dc3545;
-    display: block;
-    /* Red background for errors */
-
-    /* after 5 seconds, make display block none */
-    animation: fadeOut 5s forwards;
-
 }
 
 .alertBox.success {
-    opacity: 1;
     background-color: #28a745;
-    display: block;
-    /* Maintain green for success */
-    animation: fadeOut 5s forwards;
 }
 
-/* Responsive design adjustments */
+/* Keyframes for Alerts */
+@keyframes fadeOut {
+
+    0%,
+    90% {
+        opacity: 1;
+        display: block;
+    }
+
+    100% {
+        opacity: 0;
+        display: none;
+    }
+}
+
+/* Responsive Design Adjustments */
 @media (max-width: 768px) {
     .navbar h1 {
         font-size: 1.25rem;
@@ -202,44 +227,14 @@ main {
 
     .container {
         width: 95%;
+        min-height: auto;
     }
 
     .navbar,
     .chatHistory,
     .input-section,
+    .form,
     .alertBox {
         padding: 10px;
     }
-}
-
-/* Keyframes for alert box fade out */
-@keyframes fadeOut {
-    0% {
-        opacity: 1;
-    }
-
-    90% {
-        opacity: 1;
-    }
-
-    100% {
-        opacity: 0;
-    }
-}
-
-@keyframes fadeIn {
-    0% {
-        opacity: 0;
-    }
-
-    90% {
-        opacity: 0;
-    }
-
-    100% {
-        opacity: 1;
-    }
-
-    /*make the element visible*/
-
 }

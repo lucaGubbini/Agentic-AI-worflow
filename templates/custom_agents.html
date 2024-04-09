@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Custom Agents</title>
+    <!-- Keep the stylesheet links unchanged -->
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/custom_agents.css">
+</head>
+
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <h2>My Agents</h2>
+            <ul id="agentList">
+                <!-- Dynamically populated list of agents will go here -->
+            </ul>
+            <button id="newAgent">Make a New Agent</button>
+            <button id="newWorkflow">Make New Workflow</button>
+        </aside>
+        <main class="main-container">
+            <section class="custom-agent-creation">
+                <header>
+                    <h1>Create Your Custom Agent</h1>
+                </header>
+                <form id="customAgentForm" class="custom-agent-form" aria-labelledby="createAgentFormTitle">
+                    <div class="form-group">
+                        <label for="agentName">Agent Name:</label>
+                        <input type="text" id="agentName" name="agentName" required aria-required="true">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modelName">Model Name:</label>
+                        <input type="text" id="modelName" name="modelName" required aria-required="true">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="maxTokens">Max Tokens:</label>
+                        <input type="number" id="maxTokens" name="maxTokens" required aria-required="true">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description/Role/Backstory:</label>
+                        <textarea id="description" name="description" required aria-required="true"></textarea>
+                    </div>
+
+                    <div class="workflow-config" id="workflowPlaceholder">
+                        <p>Workflow configuration will be added here.</p>
+                    </div>
+
+                    <div class="form-group action-buttons">
+                        <button type="submit">Create Agent</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+    <script src="../static/js/custom_agents.js"></script>
+</body>
+
+</html>

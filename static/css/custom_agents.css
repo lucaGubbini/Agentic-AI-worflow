@@ -1,0 +1,124 @@
+/* Custom Agents Page Specific Styles */
+
+/* Layout for the entire dashboard including sidebar and form */
+.dashboard {
+    display: flex;
+    height: 100vh;
+    align-items: stretch;
+    /* Ensure children fill the height */
+}
+
+/* Styling for the sidebar */
+.sidebar {
+    background-color: #1F2937;
+    padding: 20px;
+    width: 250px;
+    /* Fixed sidebar width */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.sidebar h2 {
+    color: #CBD5E0;
+    margin-bottom: 20px;
+}
+
+/* Styling for the list of agents in the sidebar */
+#agentList {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+#agentList li {
+    background-color: #2D3748;
+    color: #CBD5E0;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+/* Buttons in the sidebar */
+.sidebar button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4FD1C5;
+    color: #1A202C;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.sidebar button:hover {
+    background-color: #38B2AC;
+}
+
+/* Main container for form */
+.main-container {
+    flex-grow: 1;
+    /* Take remaining space */
+    background-color: #111827;
+    padding: 40px;
+    overflow-y: auto;
+    /* For scroll on small screens */
+}
+
+/* Enhancements for the form */
+.custom-agent-form {
+    background: #2D3748;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.5);
+    max-width: 500px;
+    margin: auto;
+    padding-right: 3rem;
+    /* Center the form in the available space */
+}
+
+/* Style adjustments for input and textarea fields */
+.custom-agent-form input[type="text"],
+.custom-agent-form input[type="number"],
+.custom-agent-form textarea {
+    background-color: #1A202C;
+    color: #CBD5E0;
+    border: 2px solid #4A5568;
+}
+
+.custom-agent-form input[type="text"]:focus,
+.custom-agent-form input[type="number"]:focus,
+.custom-agent-form textarea:focus {
+    border-color: #63B3ED;
+    box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.5);
+}
+
+/* Custom styles for the submit button */
+.custom-agent-form button[type="submit"] {
+    background-color: #4FD1C5;
+    color: #1A202C;
+}
+
+.custom-agent-form button[type="submit"]:hover {
+    background-color: #38B2AC;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .dashboard {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+    }
+
+    .main-container {
+        padding: 20px;
+    }
+
+    .custom-agent-form {
+        width: 90%;
+    }
+}
