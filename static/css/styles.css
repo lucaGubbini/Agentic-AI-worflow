@@ -243,3 +243,47 @@ body {
     position: relative;
     /* Ensures the body respects the z-index of the pseudo-element */
 }
+
+/* Chat Message Bubble Styling */
+.message {
+    padding: 15px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    width: fit-content;
+    /* Make the message as wide as its content */
+    max-width: 60%;
+    /* Maximum width */
+    word-wrap: break-word;
+    /* Ensure long words do not break the layout */
+}
+
+.ai-message {
+    margin-left: auto;
+    /* Align to the right */
+    background-color: var(--ai-message-bg-color);
+}
+
+.user-message {
+    margin-right: auto;
+    /* Align to the left */
+    background-color: var(--user-message-bg-color);
+    color: white;
+    /* Ensures text color is white for visibility */
+}
+
+/* Responsive Design Adjustments for better QOL */
+@media (max-width: 768px) {
+    .message {
+        max-width: 75%;
+        /* Increase max-width for better readability on smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    .message {
+        max-width: 85%;
+        /* Further increase max-width for mobile screens */
+    }
+}
+
+/* Rest of your styles remain unchanged */
