@@ -1,15 +1,20 @@
-/* Base Styles */
 body,
 html {
+    height: 100%;
     margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
+    background-image: url("../images/background.png");
+    /* Example gradient background */
+    font-family: 'Open Sans', sans-serif;
 }
 
 .container {
-    max-width: 1200px;
-    margin: auto;
+    background: #090c33;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     padding: 20px;
+    margin-top: 20px;
+    color: white;
+    /* or center vertically */
 }
 
 /* Header Styles */
@@ -18,16 +23,20 @@ html {
     width: auto;
 }
 
-/* Using BEM for button styles */
 .button {
     background-color: #007BFF;
     color: white;
-    padding: 10px 20px;
+    padding: 10px 15px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover,
+.button:focus {
+    background-color: #0056b3;
+    /* Darken button color on hover/focus */
 }
 
 .button--success {
@@ -52,13 +61,14 @@ html {
 }
 
 .ai-message {
-    background-color: #f1f1f1;
+    background-color: #b10a0a;
+    color: #090c33;
 }
 
 .user-message {
     text-align: right;
     background-color: #007bff;
-    color: white;
+    color: #090909;
 }
 
 /* Responsive Design */
@@ -97,4 +107,28 @@ html {
     bottom: 20px;
     right: 20px;
     z-index: 1000;
+}
+
+.button {
+    background-color: #007BFF;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover,
+.button:focus {
+    background-color: #0056b3;
+    /* Darken button color on hover/focus */
+}
+
+#userPrompt {
+    background-color: #444444;
+    color: #090909;
+    color: white;
+    width: 97%;
+
 }

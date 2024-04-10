@@ -6,6 +6,7 @@
     height: 100vh;
     align-items: stretch;
     background-color: black;
+    color: #ccc;
     /* Ensure children fill the height */
 }
 
@@ -139,4 +140,56 @@
 #description {
     padding: 0.5rem;
     min-height: 3rem;
+}
+
+.custom-agent-form {
+    background: #333333;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    color: #ccc;
+}
+
+.custom-agent-form input[type=text],
+.custom-agent-form input[type=number],
+.custom-agent-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+.custom-agent-form input[type=text]:focus,
+.custom-agent-form input[type=number]:focus,
+.custom-agent-form textarea:focus {
+    border-color: #007BFF;
+}
+
+body {
+    background-image: url('../images/background.png');
+    /* Example pattern */
+}
+
+.agent-image {
+    width: 100px;
+    height: auto;
+    border-radius: 50%;
+    /* Circular images for agent avatars */
+    margin: 10px;
+}
+
+@media screen and (max-width: 768px) {
+    .agent-image {
+        width: 80px;
+        /* Smaller images on mobile */
+    }
+
+    .custom-agent-form {
+        padding: 10px;
+        /* Less padding on smaller screens */
+    }
 }
