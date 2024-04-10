@@ -1,5 +1,5 @@
 // controllers/chatController.js
-const db = require('../public/db').getDb; // Assuming you have a db module that exports a getDb function
+const db = require('../db').getDb; // Assuming you have a db module that exports a getDb function
 
 // Save chat history to the database
 async function saveChatHistory(chatHistory) {

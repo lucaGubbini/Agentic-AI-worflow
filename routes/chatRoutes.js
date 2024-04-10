@@ -1,5 +1,5 @@
 const express = require('express');
-const { saveChatHistory, generateCode } = require('../../controllers/chatController');
+const { saveChatHistory, generateCode } = require('../controllers/chatController');
 
 const router = express.Router();
 

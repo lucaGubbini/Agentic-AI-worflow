@@ -1,5 +1,5 @@
 // controllers/agentController.js
-const db = require('../public/db').getDb; // Ensure this points to your db module with getDb function
+const db = require('../db').getDb; // Ensure this points to your db module with getDb function
 
 // Create a new agent in the database
 async function createAgent(agentData) {

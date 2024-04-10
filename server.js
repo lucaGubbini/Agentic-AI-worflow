@@ -8,7 +8,7 @@ const http = require('http');
 const path = require('path');
 
 // Assuming db.js has been updated to not use deprecated options
-const db = require('../db');
+const db = require('./db');
 
 const app = express();
 const port = process.env.PORT || 8001;

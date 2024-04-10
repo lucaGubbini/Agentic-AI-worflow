@@ -1,6 +1,6 @@
 class ChatInterface {
     constructor() {
-        this.apiEndpoint = '/generate-code'; // Centralize API endpoint
+        this.apiEndpoint = '/generate-code'; // API endpoint to generate code
         this.saveChatEndpoint = '/chat/save-history'; // Endpoint for saving chat history
         this.bindEventListeners();
         this.isGeneratingCode = false;
@@ -43,13 +43,13 @@ class ChatInterface {
             });
 
             if (!response.ok) {
-                throw new Error(`Failed to fetch: ${response.statusText}`);
+                throw new Error(`HTTP Error: ${response.statusText}`);
             }
 
             return await response.json();
         } catch (error) {
-            this.displayAlert(error.message, 'error');
-            throw error; // Re-throw to allow caller to handle as well
+            this.displayAlert(`Error: ${error.message}`, 'error');
+            console.error('Request Error:', error);
         }
     }
 
@@ -58,7 +58,6 @@ class ChatInterface {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${className}`;
         messageDiv.textContent = text;
-
         chatHistory.appendChild(messageDiv);
         chatHistory.scrollTop = chatHistory.scrollHeight;
     }
@@ -66,7 +65,6 @@ class ChatInterface {
     async handleGenerateCode() {
         const userPrompt = document.getElementById('userPrompt').value.trim();
         const prompt = userPrompt || "Enter your code generation prompt here...";
-        if (!userPrompt) document.getElementById('userPrompt').value = prompt;
 
         this.clearAlert();
         this.updateGeneratingCodeStatus(true);
@@ -74,9 +72,13 @@ class ChatInterface {
         try {
             const data = await this.postRequest(this.apiEndpoint, { description: prompt });
             this.appendMessage(prompt, 'user-message');
-            this.appendMessage(data.code, 'ai-message'); // Ensure that the backend is sending 'code' key in response
+            if (data && data.code) {
+                this.appendMessage(data.code, 'ai-message');
+            } else {
+                this.appendMessage("Error: No code generated.", 'ai-message');
+            }
         } catch (error) {
-            // Error handling is managed within postRequest
+            // Error handling is already managed within postRequest
         } finally {
             this.updateGeneratingCodeStatus(false);
         }
@@ -90,14 +92,20 @@ class ChatInterface {
     }
 
     async handleSaveChat() {
-        const chatHistory = Array.from(document.querySelectorAll('.message'))
-            .map(msgDiv => msgDiv.textContent)
-            .join('\n');
+        const chatHistoryElements = document.querySelectorAll('.message');
+        const chatHistory = Array.from(chatHistoryElements).map(msgDiv => msgDiv.textContent).join('\n');
+
+        this.clearAlert();
+
         try {
             const data = await this.postRequest(this.saveChatEndpoint, { chatHistory });
-            this.displayAlert(data.message, 'success');
+            if (data && data.message) {
+                this.displayAlert(data.message, 'success');
+            } else {
+                this.displayAlert("Error: Chat not saved.", 'error');
+            }
         } catch (error) {
-            // Error handling is managed within postRequest
+            // Error handling is already managed within postRequest
         }
     }
 
