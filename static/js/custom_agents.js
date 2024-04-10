@@ -12,24 +12,25 @@ document.addEventListener('DOMContentLoaded', () => {
             description: document.getElementById('description').value
         };
 
-        // Placeholder logic to simulate form submission
+        // Logic to send a POST request to the server
         try {
             console.log('Submitting form data:', formData);
 
-            // Simulate a network request with a timeout
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const response = await fetch('http://localhost:8001/create-agent', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
 
-            // This is where you would typically make an API call
-            // For example:
-            // const response = await fetch('/api/create-agent', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     body: JSON.stringify(formData),
-            // });
+            if (!response.ok) {
+                // If the response is not ok, throw an error to jump to the catch block
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
 
-            // Let's assume everything went well
+            const result = await response.json();
+            console.log(result.message); // Log the success message from the server
             alert('Custom agent created successfully!');
 
             // Reset form after successful submission

@@ -1,12 +1,29 @@
-/* General Resets */
+/* General Resets and Variables */
+:root {
+    --container-bg-color: #1F2937;
+    --navbar-bg-color: #374151;
+    --button-bg-color: #22C55E;
+    --button-hover-scale: 1.05;
+    --error-bg-color: #EF4444;
+    --text-color: #F9FAFB;
+    --input-bg-color: #262E38;
+    --focus-border-color: #5C6BC0;
+    --alert-success-bg-color: #28a745;
+    --alert-error-bg-color: #dc3545;
+    --ai-message-bg-color: #4B5563;
+    --user-message-bg-color: #2563EB;
+    --submit-button-bg-color: #5C6BC0;
+    --submit-button-hover-bg-color: #3949AB;
+}
+
 body,
 html {
     height: 100%;
     margin: 0;
     padding: 0;
-    background-color: #111827;
+    background-color: var(--background-color);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #F9FAFB;
+    color: var(--text-color);
 }
 
 /* Main Container Styling */
@@ -23,7 +40,7 @@ main {
     width: 90%;
     max-width: 1000px;
     min-height: 600px;
-    background-color: #1F2937;
+    background-color: var(--container-bg-color);
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     overflow: hidden;
@@ -36,16 +53,15 @@ main {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #374151;
+    background-color: var(--navbar-bg-color);
     padding: 15px;
 }
 
 .navbar h1 {
     font-size: 1.75rem;
-    color: #F9FAFB;
+    color: var(--text-color);
 }
 
-/* Status Section Styling */
 .status-section {
     display: flex;
     align-items: center;
@@ -59,7 +75,6 @@ main {
     margin-right: 10px;
 }
 
-/* Chat Saved Message Styling */
 .chat-saved {
     color: #4ADE80;
     font-size: 0.875rem;
@@ -78,19 +93,15 @@ main {
     font-size: 1rem;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.2s;
+    background-color: var(--button-bg-color);
 }
 
 .button:hover {
-    transform: scale(1.05);
-}
-
-.saveChat,
-.generateCode {
-    background-color: #22C55E;
+    transform: scale(var(--button-hover-scale));
 }
 
 .newChat {
-    background-color: #EF4444;
+    background-color: var(--error-bg-color);
 }
 
 /* Chat Section Styling */
@@ -104,7 +115,7 @@ main {
     flex-grow: 1;
     overflow-y: auto;
     padding: 20px;
-    background-color: #262E38;
+    background-color: var(--input-bg-color);
 }
 
 /* Chat Message Bubble Styling */
@@ -117,119 +128,69 @@ main {
 
 .ai-message {
     align-self: flex-start;
-    background-color: #4B5563;
+    background-color: var(--ai-message-bg-color);
 }
 
 .user-message {
     align-self: flex-end;
-    background-color: #2563EB;
+    background-color: var(--user-message-bg-color);
 }
 
-/* Input Section Styling */
+/* Form and Input Styling */
 .input-section,
-.form {
-    width: calc(100% - 40px);
-    margin: auto;
-    margin-bottom: 20px;
-    padding: 20px;
+.form .form-group {
+    padding: 40px;
+    margin-bottom: 5px;
 }
 
 .userPrompt,
 input[type="text"],
 input[type="number"],
 textarea {
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+    border-color: #ddd;
     width: 100%;
-    padding: 15px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    background-color: #262E38;
-    color: #F9FAFB;
-    font-size: 16px;
-    transition: all 0.3s ease-in-out;
 }
 
 .userPrompt:focus,
-input[type="text"]:focus,
-input[type="number"]:focus,
+input:focus,
 textarea:focus {
-    outline: none;
-    border-color: #5C6BC0;
+    border-color: var(--focus-border-color);
     box-shadow: 0 0 0 3px rgba(92, 107, 192, 0.5);
 }
 
-/* Button Submission Styling */
+/* Submission Button Styling */
 button[type="submit"] {
-    background-color: #5C6BC0;
-    color: white;
-    padding: 15px;
-    border: none;
-    border-radius: 4px;
-    font-size: 18px;
-    margin-top: 20px;
-    transition: background-color 0.3s;
-    width: 100%;
+    background-color: var(--submit-button-bg-color);
 }
 
 button[type="submit"]:hover {
-    background-color: #3949AB;
+    background-color: var(--submit-button-hover-bg-color);
 }
 
 /* Alert Box Styling */
 .alertBox {
-    margin: 10px 20px;
-    border-radius: 4px;
-    padding: 10px;
-    background-color: #28a745;
-    color: white;
-    animation: fadeOut 5s forwards;
+    background-color: var(--alert-success-bg-color);
 }
 
 .alertBox.error {
-    background-color: #dc3545;
-}
-
-.alertBox.success {
-    background-color: #28a745;
-}
-
-/* Keyframes for Alerts */
-@keyframes fadeOut {
-
-    0%,
-    90% {
-        opacity: 1;
-        display: block;
-    }
-
-    100% {
-        opacity: 0;
-        display: none;
-    }
+    background-color: var(--alert-error-bg-color);
 }
 
 /* Responsive Design Adjustments */
 @media (max-width: 768px) {
-    .navbar h1 {
-        font-size: 1.25rem;
-    }
 
+    .navbar h1,
     .button {
-        padding: 8px 12px;
-        font-size: 0.875rem;
+        font-size: 1.25rem;
     }
 }
 
 @media (max-width: 480px) {
-    main {
-        padding: 5px;
-    }
 
-    .container {
-        width: 95%;
-        min-height: auto;
-    }
-
+    main,
+    .container,
     .navbar,
     .chatHistory,
     .input-section,
@@ -237,4 +198,48 @@ button[type="submit"]:hover {
     .alertBox {
         padding: 10px;
     }
+}
+
+/* New styles for the header logo */
+.header-logo {
+    height: 50px;
+    /* Adjust as needed */
+    width: auto;
+    /* More styles can be added here */
+}
+
+/* New styles for agent images in the sidebar */
+.agent-image {
+    width: 100px;
+    /* Adjust as needed */
+    height: auto;
+    margin: 10px 0;
+    /* More styles can be added here */
+}
+
+body::before {
+    content: '';
+    display: block;
+    position: fixed;
+    /* Use absolute if you don't want it fixed during scroll */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("../images/background.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    /* Use scroll if you don't want it fixed during scroll */
+    opacity: 1.1;
+    /* Set the opacity of the background image */
+    pointer-events: none;
+    /* Allows clicks to pass through to the underlying elements */
+    z-index: -1;
+    /* Ensures the pseudo-element is behind the content of the body */
+}
+
+body {
+    position: relative;
+    /* Ensures the body respects the z-index of the pseudo-element */
 }

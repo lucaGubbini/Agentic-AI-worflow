@@ -5,6 +5,7 @@
     display: flex;
     height: 100vh;
     align-items: stretch;
+    background-color: black;
     /* Ensure children fill the height */
 }
 
@@ -121,4 +122,21 @@
     .custom-agent-form {
         width: 90%;
     }
+}
+
+.form-group {
+    padding: 1rem;
+    min-height: 2rem;
+}
+
+#modelName,
+#agentName,
+#maxTokens {
+    padding: 0.5rem;
+    min-height: 1rem;
+}
+
+#description {
+    padding: 0.5rem;
+    min-height: 3rem;
 }
