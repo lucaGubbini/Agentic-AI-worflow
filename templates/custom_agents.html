@@ -5,47 +5,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Custom Agents</title>
-    <!-- Keep the stylesheet links unchanged -->
+    <!-- Adjusted paths assuming server configuration serves static files from a 'static' directory -->
     <link rel="stylesheet" href="../static/css/styles.css">
     <link rel="stylesheet" href="../static/css/custom_agents.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script> <!-- Vue.js for progressive enhancement -->
 </head>
 
 <body>
-    <div class="dashboard">
+    <div id="app" class="dashboard">
         <aside class="sidebar">
             <h2>My Agents</h2>
             <ul id="agentList">
-                <!-- Dynamically populated list of agents will go here -->
+                <!-- Vue.js can dynamically populate this list -->
             </ul>
             <button id="newAgent">Make a New Agent</button>
             <button id="newWorkflow">Make New Workflow</button>
-            <img src="../static/images/Agent1.png" alt="Agent 1" class="agent-image">
-            <img src="../static/images/Agent2.png" alt="Agent 2" class="agent-image">
+            <img src="../static/images/Agent1.png" alt="Illustration of an AI agent" class="agent-image">
+            <img src="../static/images/Agent2.png" alt="Illustration of a second AI agent" class="agent-image">
         </aside>
         <main class="main-container">
             <section class="custom-agent-creation">
                 <header>
                     <h1>Create Your Custom Agent</h1>
                 </header>
-                <form id="customAgentForm" class="custom-agent-form" aria-labelledby="createAgentFormTitle">
+                <!-- Vue.js handles the form, providing immediate validation feedback -->
+                <form id="customAgentForm" class="custom-agent-form" aria-labelledby="createAgentFormTitle"
+                    @submit.prevent="handleSubmit">
                     <div class="form-group">
                         <label for="agentName">Agent Name:</label>
-                        <input type="text" id="agentName" name="agentName" required aria-required="true">
+                        <input type="text" id="agentName" name="agentName" v-model="agent.agentName" required
+                            aria-required="true">
+                        <span v-if="validationErrors.agentName" class="error">{{ validationErrors.agentName }}</span>
                     </div>
 
                     <div class="form-group">
                         <label for="modelName">Model Name:</label>
-                        <input type="text" id="modelName" name="modelName" required aria-required="true">
+                        <input type="text" id="modelName" name="modelName" v-model="agent.modelName" required
+                            aria-required="true">
+                        <span v-if="validationErrors.modelName" class="error">{{ validationErrors.modelName }}</span>
                     </div>
 
                     <div class="form-group">
                         <label for="maxTokens">Max Tokens:</label>
-                        <input type="number" id="maxTokens" name="maxTokens" required aria-required="true">
+                        <input type="number" id="maxTokens" name="maxTokens" v-model.number="agent.maxTokens" required
+                            aria-required="true">
+                        <span v-if="validationErrors.maxTokens" class="error">{{ validationErrors.maxTokens }}</span>
                     </div>
 
                     <div class="form-group">
                         <label for="description">Description/Role/Backstory:</label>
-                        <textarea id="description" name="description" required aria-required="true"></textarea>
+                        <textarea id="description" name="description" v-model="agent.description" required
+                            aria-required="true"></textarea>
+                        <span v-if="validationErrors.description" class="error">{{ validationErrors.description
+                            }}</span>
                     </div>
 
                     <div class="workflow-config" id="workflowPlaceholder">
@@ -60,6 +72,42 @@
         </main>
     </div>
     <script src="../static/js/custom_agents.js"></script>
+    <!-- Including Vue.js script for progressive enhancement -->
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                agent: {
+                    agentName: '',
+                    modelName: '',
+                    maxTokens: '',
+                    description: ''
+                },
+                validationErrors: {}
+            },
+            methods: {
+                validateForm() {
+                    this.validationErrors = {}; // Reset validation errors
+                    let isValid = true;
+                    if (!this.agent.agentName) {
+                        this.validationErrors.agentName = 'Agent name is required.';
+                        isValid = false;
+                    }
+                    // Additional validation checks can be added here
+                    return isValid;
+                },
+                handleSubmit() {
+                    if (this.validateForm()) {
+                        // Form is valid, submit it
+                        console.log('Form submission', this.agent);
+                    } else {
+                        // Handle form invalid case
+                        console.error('Validation errors', this.validationErrors);
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>

@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
             description: document.getElementById('description').value
         };
 
-        // Logic to send a POST request to the server
         try {
             console.log('Submitting form data:', formData);
 
@@ -25,20 +24,61 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) {
-                // If the response is not ok, throw an error to jump to the catch block
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(`Error: ${response.status}. Please try again.`);
             }
 
             const result = await response.json();
-            console.log(result.message); // Log the success message from the server
-            alert('Custom agent created successfully!');
-
-            // Reset form after successful submission
+            console.log(result.message);
+            displaySuccessMessage('Custom agent created successfully!');
             form.reset();
         } catch (error) {
-            // Handle errors here
             console.error('An error occurred:', error);
-            alert('Failed to create custom agent. Please try again.');
+            displayErrorMessage(error.message);
         }
     });
+
+    function displayErrorMessage(message) {
+        const toastContainer = getToastContainer();
+        const toastMessage = createToastMessage(message, 'error');
+        toastContainer.appendChild(toastMessage);
+        setTimeout(() => toastMessage.remove(), 5000);
+    }
+
+    function displaySuccessMessage(message) {
+        const toastContainer = getToastContainer();
+        const toastMessage = createToastMessage(message, 'success');
+        toastContainer.appendChild(toastMessage);
+        setTimeout(() => toastMessage.remove(), 5000);
+    }
+
+    function getToastContainer() {
+        let toastContainer = document.getElementById('toastContainer');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toastContainer';
+            toastContainer.style.position = 'fixed';
+            toastContainer.style.bottom = '20px';
+            toastContainer.style.right = '20px';
+            toastContainer.style.zIndex = '1000';
+            document.body.appendChild(toastContainer);
+        }
+        return toastContainer;
+    }
+
+    function createToastMessage(message, type) {
+        const toast = document.createElement('div');
+        toast.textContent = message;
+        toast.style.background = type === 'error' ? '#f44336' : '#4CAF50';
+        toast.style.color = 'white';
+        toast.style.padding = '10px';
+        toast.style.marginTop = '10px';
+        toast.style.borderRadius = '5px';
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.5s';
+
+        // Trigger the opacity transition after adding the element to the DOM
+        setTimeout(() => toast.style.opacity = '1', 0);
+
+        return toast;
+    }
 });

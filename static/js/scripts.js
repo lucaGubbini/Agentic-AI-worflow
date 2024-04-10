@@ -1,5 +1,6 @@
 class ChatInterface {
     constructor() {
+        this.apiEndpoint = '/generate-code'; // Centralize API endpoint
         this.bindEventListeners();
         this.isGeneratingCode = false;
     }
@@ -17,62 +18,6 @@ class ChatInterface {
         chatHistory.style.maxHeight = `${window.innerHeight - chatHistory.offsetTop - 60}px`;
     }
 
-    async handleGenerateCode() {
-        const userPrompt = document.getElementById('userPrompt').value.trim();
-        const prompt = userPrompt || "make a simple code for calculating the area of a rectangle in python";
-        if (!userPrompt) document.getElementById('userPrompt').value = prompt;
-
-        this.clearAlert();
-        this.updateGeneratingCodeStatus(true);
-
-        try {
-            const code = await this.fetchGeneratedCode(prompt);
-            this.appendMessage(prompt, 'user-message');
-            this.appendMessage(code, 'ai-message');
-        } catch (error) {
-            this.displayAlert(error, 'error');
-        } finally {
-            this.updateGeneratingCodeStatus(false);
-        }
-    }
-
-    updateGeneratingCodeStatus(isGenerating) {
-        this.isGeneratingCode = isGenerating;
-        const generateButton = document.getElementById('generateCode');
-        generateButton.textContent = isGenerating ? 'Generating...' : 'Generate Code';
-        generateButton.disabled = isGenerating;
-    }
-
-    async fetchGeneratedCode(description) {
-        try {
-            const response = await fetch('/generate-code', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ description })
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to generate code. Please try again.');
-            }
-
-            const data = await response.json();
-            return data.code;
-        } catch (error) {
-            this.displayAlert(error.message, 'error');
-            throw error;
-        }
-    }
-
-    appendMessage(text, className) {
-        const chatHistory = document.getElementById('chatHistory');
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${className}`;
-        messageDiv.textContent = text;
-
-        chatHistory.appendChild(messageDiv);
-        chatHistory.scrollTop = chatHistory.scrollHeight;
-    }
-
     displayAlert(message, type) {
         const alertBox = document.getElementById('alertBox');
         alertBox.textContent = message;
@@ -88,31 +33,72 @@ class ChatInterface {
         alertBox.classList.add('hidden');
     }
 
+    async postRequest(url, data) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch: ${response.statusText}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            this.displayAlert(error.message, 'error');
+            throw error; // Re-throw to allow caller to handle as well
+        }
+    }
+
+    appendMessage(text, className) {
+        const chatHistory = document.getElementById('chatHistory');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${className}`;
+        messageDiv.textContent = text;
+
+        chatHistory.appendChild(messageDiv);
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    async handleGenerateCode() {
+        const userPrompt = document.getElementById('userPrompt').value.trim();
+        const prompt = userPrompt || "make a simple code for calculating the area of a rectangle in python";
+        if (!userPrompt) document.getElementById('userPrompt').value = prompt;
+
+        this.clearAlert();
+        this.updateGeneratingCodeStatus(true);
+
+        try {
+            const data = await this.postRequest(this.apiEndpoint, { description: prompt });
+            this.appendMessage(prompt, 'user-message');
+            this.appendMessage(data.generatedCode, 'ai-message');
+        } catch (error) {
+            // Error handling is managed within postRequest
+        } finally {
+            this.updateGeneratingCodeStatus(false);
+        }
+    }
+
+    updateGeneratingCodeStatus(isGenerating) {
+        this.isGeneratingCode = isGenerating;
+        const generateButton = document.getElementById('generateCode');
+        generateButton.textContent = isGenerating ? 'Generating...' : 'Generate Code';
+        generateButton.disabled = isGenerating;
+    }
+
     async handleSaveChat() {
         const chatHistory = Array.from(document.querySelectorAll('.message'))
             .map(msgDiv => msgDiv.textContent)
             .join('\n');
         try {
-            const response = await fetch('http://localhost:8001/save-chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chatHistory })
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to save chat history. Please try again.');
-            }
-
-            const data = await response.json();
+            const data = await this.postRequest('http://localhost:8001/save-chat', { chatHistory });
             this.displayAlert(data.message, 'success');
-            // set allert opacity to 1
-            document.getElementById('alertBox').style.opacity = 1;
         } catch (error) {
-            this.displayAlert(error.message, 'error');
-            document.getElementById('alertBox').style.opacity = 1;
+            // Error handling is managed within postRequest
         }
     }
-
 
     handleNewChat() {
         document.getElementById('chatHistory').innerHTML = '';

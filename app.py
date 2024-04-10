@@ -1,38 +1,31 @@
 from quart import Quart, request, jsonify, render_template
 import logging
 import os
-import aiohttp  # For async HTTP requests
 from dotenv import load_dotenv
 import motor.motor_asyncio  # Asynchronous MongoDB driver
+from quart_cors import cors  # for CORS handling
+from aiohttp import ClientSession  # For async HTTP requests
+from bson.objectid import ObjectId  # For converting MongoDB IDs
 
 load_dotenv()  # Load environment variables from .env file
 
 app = Quart(__name__)
+app = cors(app, allow_origin=os.getenv('ALLOWED_ORIGIN', '*'))
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # MongoDB setup
 mongo_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017/chatApp')
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient(mongo_uri)
-db = mongo_client.chatApp
+db = mongo_client.get_default_database()  # Defaulting to the database in MONGO_URI
 agents_collection = db.agents
 
-# Environment variables for LM Studio configuration
-lm_studio_api_key = os.getenv('API_KEY', 'default_key_here')
-lm_studio_api_base_url = os.getenv('BASE_URL', 'http://localhost:1234/v1')
-default_model = os.getenv('DEFAULT_MODEL', 'TheBloke/Mistral-7B-Instruct-v0.2-GGUF/mistral-7b-instruct-v0.2.Q8_0.gguf')
-
-# CORS configuration
-@app.after_request
-async def add_cors_headers(response):
-    response.headers.update({
-        'Access-Control-Allow-Origin': os.getenv('ALLOWED_ORIGIN', '*'),
-        'Access-Control-Allow-Methods': 'GET, POST',
-        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-    })
-    return response
+# Environment variables for API configuration
+api_key = os.getenv('API_KEY')
+api_base_url = os.getenv('BASE_URL')
+default_model = os.getenv('DEFAULT_MODEL')
 
 @app.route('/')
 async def home():
@@ -49,44 +42,46 @@ async def generate_code():
         logger.error("Project description is required.")
         return jsonify({'error': 'Project description is required.'}), 400
 
-    try:
-        code = await generate_code_from_lm_studio(project_description)
-        return jsonify({'code': code}), 200
-    except Exception as e:
-        logger.error(f"LM Studio server error: {e}")
-        return jsonify({'error': 'Failed to generate code from LM Studio server.'}), 500
+    async with ClientSession() as session:
+        try:
+            code = await generate_code_from_api(session, project_description)
+            return jsonify({'code': code}), 200
+        except Exception as e:
+            logger.error(f"API server error: {e}")
+            return jsonify({'error': 'Failed to generate code from API server.'}), 500
 
 @app.route('/create-agent', methods=['POST'])
 async def create_agent():
     """Create a new agent with custom settings."""
     data = await request.get_json()
+    if not all(key in data for key in ['agentName', 'modelName', 'maxTokens', 'description']):
+        return jsonify({'error': 'Missing fields for creating an agent.'}), 400
 
     try:
-        # Insert new agent into MongoDB
         result = await agents_collection.insert_one(data)
         return jsonify({'message': 'Custom agent created successfully!', 'agentId': str(result.inserted_id)}), 201
     except Exception as e:
         logger.error(f"Error creating agent: {e}")
         return jsonify({'error': 'Failed to create custom agent.'}), 500
 
-async def generate_code_from_lm_studio(description: str) -> str:
-    """Generates code using LM Studio's local model."""
-    async with aiohttp.ClientSession() as session:
-        async with session.post(
-            f"{lm_studio_api_base_url}/completions",
-            json={
-                "model": default_model,
-                "prompt": description,
-                "temperature": 0.7,
-                "max_tokens": 5000
-            },
-            headers={"Authorization": f"Bearer {lm_studio_api_key}"}
-        ) as response:
-            if response.status == 200:
-                data = await response.json()
-                return data['choices'][0]['text'] if data['choices'] else 'No code was generated.'
-            else:
-                raise Exception(f"Failed to fetch response from LM Studio, status: {response.status}")
+async def generate_code_from_api(session: ClientSession, description: str) -> str:
+    """Generates code using the API's model."""
+    headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
+    async with session.post(
+        f"{api_base_url}/completions",
+        json={
+            "model": default_model,
+            "prompt": description,
+            "temperature": 0.7,
+            "max_tokens": 5000
+        },
+        headers=headers
+    ) as response:
+        if response.status == 200:
+            data = await response.json()
+            return data['choices'][0]['text'] if data['choices'] else 'No code was generated.'
+        else:
+            raise Exception(f"Failed to fetch response from API, status: {response.status}")
 
 @app.errorhandler(404)
 async def page_not_found(e):
@@ -99,4 +94,4 @@ async def server_error(e):
     return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=int(os.getenv('PORT', 8000)))
+    app.run(debug=os.getenv('DEBUG', 'False').lower() == 'true', port=int(os.getenv('PORT', 8000)))

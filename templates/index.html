@@ -5,13 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Code Generator Chat Interface</title>
+    <!-- Adjusted the paths to ensure they work correctly based on server configuration -->
     <link rel="stylesheet" href="../static/css/styles.css">
 </head>
 
 <body>
     <header>
+        <!-- Improved accessibility by adding more descriptive alt text -->
         <a href="custom_agents.html" class="button">Create Custom Agents</a>
-        <img src="../static/images/roboFace.png" alt="Coder Logo" class="header-logo">
+        <img src="../static/images/roboFace.png" alt="Robot face logo representing the coder" class="header-logo">
     </header>
     <main>
         <div class="container">
@@ -19,7 +21,6 @@
                 <h1>AI Code Generator Chat Interface</h1>
                 <div class="status-section">
                     <span id="statusIndicator"></span>
-                    <!-- The chat-saved message will be hidden by default and displayed by JS -->
                     <span id="chatSaved" class="chat-saved hidden">Chat Saved</span>
                 </div>
                 <div class="button-group">
@@ -29,15 +30,10 @@
             </nav>
             <section id="chatSection">
                 <div id="chatHistory" class="chatHistory">
-                    <!-- Example AI message -->
-                    <!-- <div class="message ai-message">AI's response...</div> -->
-                    <!-- Example user message -->
-                    <!-- <div class="message user-message">User's question...</div> -->
-                    <!-- Further messages -->
+                    <!-- Placeholder for chat history -->
                 </div>
-                <!-- Removed the unwanted "Chat history saved successfully." message here -->
                 <div class="input-section">
-                    <textarea id="userPrompt" class="userPrompt"
+                    <textarea id="userPrompt" class="userPrompt" aria-label="Enter your project description"
                         placeholder="Enter your project description..."></textarea>
                     <button id="generateCode" class="button generateCode">Generate Code</button>
                 </div>
@@ -45,6 +41,7 @@
             </section>
         </div>
     </main>
+    <!-- Corrected script path based on server configuration -->
     <script src="../static/js/scripts.js"></script>
 </body>
 

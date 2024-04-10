@@ -1,289 +1,100 @@
-/* General Resets and Variables */
-:root {
-    --container-bg-color: #1F2937;
-    --navbar-bg-color: #374151;
-    --button-bg-color: #22C55E;
-    --button-hover-scale: 1.05;
-    --error-bg-color: #EF4444;
-    --text-color: #F9FAFB;
-    --input-bg-color: #262E38;
-    --focus-border-color: #5C6BC0;
-    --alert-success-bg-color: #28a745;
-    --alert-error-bg-color: #dc3545;
-    --ai-message-bg-color: #4B5563;
-    --user-message-bg-color: #2563EB;
-    --submit-button-bg-color: #5C6BC0;
-    --submit-button-hover-bg-color: #3949AB;
-}
-
+/* Base Styles */
 body,
 html {
-    height: 100%;
     margin: 0;
     padding: 0;
-    background-color: var(--background-color);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: var(--text-color);
-}
-
-/* Main Container Styling */
-main {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-    padding: 20px;
+    font-family: Arial, sans-serif;
 }
 
 .container {
-    width: 90%;
-    max-width: 1000px;
-    min-height: 600px;
-    background-color: var(--container-bg-color);
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Navbar Styling */
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: var(--navbar-bg-color);
-    padding: 15px;
-}
-
-.navbar h1 {
-    font-size: 1.75rem;
-    color: var(--text-color);
-}
-
-.status-section {
-    display: flex;
-    align-items: center;
-}
-
-#statusIndicator {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background-color: #10B981;
-    margin-right: 10px;
-}
-
-.chat-saved {
-    color: #4ADE80;
-    font-size: 0.875rem;
-}
-
-/* Button Styling */
-.button-group {
-    display: flex;
-    gap: 10px;
-}
-
-.button {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 6px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
-    background-color: var(--button-bg-color);
-}
-
-.button:hover {
-    transform: scale(var(--button-hover-scale));
-}
-
-.newChat {
-    background-color: var(--error-bg-color);
-}
-
-/* Chat Section Styling */
-#chatSection {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.chatHistory {
-    flex-grow: 1;
-    overflow-y: auto;
+    max-width: 1200px;
+    margin: auto;
     padding: 20px;
-    background-color: var(--input-bg-color);
 }
 
-/* Chat Message Bubble Styling */
-.message {
-    padding: 15px;
-    border-radius: 16px;
-    margin-bottom: 20px;
-    max-width: 80%;
-}
-
-.ai-message {
-    align-self: flex-start;
-    background-color: var(--ai-message-bg-color);
-}
-
-.user-message {
-    align-self: flex-end;
-    background-color: var(--user-message-bg-color);
-}
-
-/* Form and Input Styling */
-.input-section,
-.form .form-group {
-    padding: 40px;
-    margin-bottom: 5px;
-}
-
-.userPrompt,
-input[type="text"],
-input[type="number"],
-textarea {
-    background-color: var(--input-bg-color);
-    color: var(--text-color);
-    border-color: #ddd;
-    width: 100%;
-}
-
-.userPrompt:focus,
-input:focus,
-textarea:focus {
-    border-color: var(--focus-border-color);
-    box-shadow: 0 0 0 3px rgba(92, 107, 192, 0.5);
-}
-
-/* Submission Button Styling */
-button[type="submit"] {
-    background-color: var(--submit-button-bg-color);
-}
-
-button[type="submit"]:hover {
-    background-color: var(--submit-button-hover-bg-color);
-}
-
-/* Alert Box Styling */
-.alertBox {
-    background-color: var(--alert-success-bg-color);
-}
-
-.alertBox.error {
-    background-color: var(--alert-error-bg-color);
-}
-
-/* Responsive Design Adjustments */
-@media (max-width: 768px) {
-
-    .navbar h1,
-    .button {
-        font-size: 1.25rem;
-    }
-}
-
-@media (max-width: 480px) {
-
-    main,
-    .container,
-    .navbar,
-    .chatHistory,
-    .input-section,
-    .form,
-    .alertBox {
-        padding: 10px;
-    }
-}
-
-/* New styles for the header logo */
+/* Header Styles */
 .header-logo {
     height: 50px;
-    /* Adjust as needed */
     width: auto;
-    /* More styles can be added here */
 }
 
-/* New styles for agent images in the sidebar */
-.agent-image {
-    width: 100px;
-    /* Adjust as needed */
-    height: auto;
-    margin: 10px 0;
-    /* More styles can be added here */
+/* Using BEM for button styles */
+.button {
+    background-color: #007BFF;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
 }
 
-body::before {
-    content: '';
-    display: block;
-    position: fixed;
-    /* Use absolute if you don't want it fixed during scroll */
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: url("../images/background.png");
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    /* Use scroll if you don't want it fixed during scroll */
-    opacity: 1.1;
-    /* Set the opacity of the background image */
-    pointer-events: none;
-    /* Allows clicks to pass through to the underlying elements */
-    z-index: -1;
-    /* Ensures the pseudo-element is behind the content of the body */
+.button--success {
+    background-color: #28a745;
 }
 
-body {
-    position: relative;
-    /* Ensures the body respects the z-index of the pseudo-element */
+.button--danger {
+    background-color: #dc3545;
 }
 
-/* Chat Message Bubble Styling */
+/* Chat Section */
+.chatHistory {
+    border: 1px solid #ccc;
+    padding: 10px;
+    height: 300px;
+    overflow-y: scroll;
+}
+
 .message {
-    padding: 15px;
-    border-radius: 16px;
-    margin-bottom: 20px;
-    width: fit-content;
-    /* Make the message as wide as its content */
-    max-width: 60%;
-    /* Maximum width */
-    word-wrap: break-word;
-    /* Ensure long words do not break the layout */
+    padding: 5px;
+    margin-bottom: 10px;
 }
 
 .ai-message {
-    margin-left: auto;
-    /* Align to the right */
-    background-color: var(--ai-message-bg-color);
+    background-color: #f1f1f1;
 }
 
 .user-message {
-    margin-right: auto;
-    /* Align to the left */
-    background-color: var(--user-message-bg-color);
+    text-align: right;
+    background-color: #007bff;
     color: white;
-    /* Ensures text color is white for visibility */
 }
 
-/* Responsive Design Adjustments for better QOL */
+/* Responsive Design */
 @media (max-width: 768px) {
-    .message {
-        max-width: 75%;
-        /* Increase max-width for better readability on smaller screens */
+    .container {
+        padding: 10px;
+    }
+
+    .header-logo {
+        height: 40px;
+    }
+
+    .chatHistory {
+        height: 200px;
     }
 }
 
-@media (max-width: 480px) {
-    .message {
-        max-width: 85%;
-        /* Further increase max-width for mobile screens */
-    }
+/* Alert Box */
+.alertBox {
+    padding: 10px;
+    margin-top: 20px;
+    color: #fff;
 }
 
-/* Rest of your styles remain unchanged */
+.alertBox--error {
+    background-color: #dc3545;
+}
+
+.alertBox--success {
+    background-color: #28a745;
+}
+
+/* Toast Container for notifications */
+#toastContainer {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
