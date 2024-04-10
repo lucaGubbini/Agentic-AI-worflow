@@ -1,135 +1,108 @@
+require('dotenv').config();
 const express = require('express');
 const { MongoClient } = require('mongodb');
-const bodyParser = require('body-parser');
 const cors = require('cors');
+const helmet = require('helmet');
+const fs = require('fs');
+const https = require('https');
+const path = require('path');
+const http = require('http'); // Make sure to require the http module
 
 const app = express();
-const port = 8001;
-const mongoUri = 'mongodb://localhost:27017/chatApp';
-
-app.use(cors());
-app.use(bodyParser.json());
-app.use(express.static('public'));
+const port = process.env.PORT || 8001;
+const mongoUri = process.env.MONGO_URI;
 
 let dbClient;
+let db;
 
 async function connectToDatabase() {
     if (!dbClient) {
         dbClient = new MongoClient(mongoUri);
         await dbClient.connect();
+        db = dbClient.db('chatApp');
         console.log('Connected successfully to database');
     }
-    return dbClient.db('chatApp').collection('chats');
 }
 
+
+// Middleware
+app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
+app.use(helmet());
+app.use(express.json());
+app.use(express.static('public', { maxAge: '1d' }));
+
+// Route handlers
+app.get('/', async (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/agent-setup', async (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'agentSetup.html'));
+});
+
+// Code generation route with MongoDB integration
 app.post('/generate-code', async (req, res) => {
+    const { description, sessionId } = req.body;
+    if (!description || !sessionId) {
+        return res.status(400).json({ error: 'Description and Session ID are required.' });
+    }
+
+    // Example logic to generate code
+    const generatedCode = `Code for ${description}`;
+
     try {
-        const chats = await connectToDatabase();
-        const { description, sessionId } = req.body;
-        if (!description) {
-            return res.status(400).json({ error: 'Description is required.' });
-        }
-
-        // Placeholder logic to fetch data from the database that influences code generation
-        const dbDataUsed = await chats.find({ sessionId }).toArray();
-        const influencedByDbData = dbDataUsed.length > 0;
-
-        const generatedCode = `Code based on: ${description}`; // Placeholder logic
-        await chats.insertOne({ sessionId, prompt: description, response: generatedCode });
-
-        res.json({
-            code: generatedCode,
-            influencedByDbData,
-            dbDataDetails: influencedByDbData ? dbDataUsed : []
-        });
+        await db.collection('generatedCodes').insertOne({ sessionId, description, generatedCode, createdAt: new Date() });
+        res.json({ generatedCode });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'An error occurred while generating code.' });
+        res.status(500).json({ error: 'Failed to save generated code.' });
     }
 });
 
-app.post('/save-chat', async (req, res) => {
-    try {
-        const chats = await connectToDatabase();
-        const { chatHistory } = req.body;
-        await chats.insertOne({ chatHistory, timestamp: new Date() });
-        res.json({ message: 'Chat history saved successfully.' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'An error occurred while saving chat history.' });
-    }
-});
-
-app.post('/save-message', async (req, res) => {
-    try {
-        const chats = await connectToDatabase();
-        const { sessionId, message } = req.body;
-        if (!sessionId || !message) {
-            return res.status(400).json({ error: 'Session ID and message are required.' });
-        }
-
-        await chats.insertOne({ sessionId, message, timestamp: new Date() });
-        res.json({ message: 'Message saved successfully.' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'An error occurred while saving the message.' });
-    }
-});
-
-app.get('/get-history/:sessionId', async (req, res) => {
-    try {
-        const chats = await connectToDatabase();
-        const sessionId = req.params.sessionId;
-        if (!sessionId) {
-            return res.status(400).json({ error: 'Session ID is required.' });
-        }
-
-        const chatHistory = await chats.find({ sessionId }).sort({ timestamp: 1 }).toArray();
-        res.json({ history: chatHistory });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'An error occurred while retrieving chat history.' });
-    }
-});
-
+// Agent creation route
 app.post('/create-agent', async (req, res) => {
-    try {
-        const agentDetails = req.body;
-        console.log("Received custom agent details: ", agentDetails);
-        // Placeholder for creating the agent in your database or service
+    const agentData = req.body;
 
-        res.json({ message: 'Custom agent created successfully.' });
+    try {
+        const result = await db.collection('agents').insertOne({ ...agentData, createdAt: new Date() });
+        res.status(201).json({ message: 'Agent created successfully', agentId: result.insertedId });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'An error occurred while creating the custom agent.' });
+        res.status(500).json({ error: 'Failed to create agent.' });
     }
 });
 
-
-const server = app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+// Error handling
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: 'Internal Server Error' });
 });
 
-const gracefulShutdown = () => {
-    console.log('Initiating graceful shutdown...');
-    if (dbClient) {
-        dbClient.close().then(() => {
-            console.log('Database connection closed.');
-            server.close(() => {
-                console.log('Server shut down.');
-                process.exit();
-            });
-        }).catch(error => {
-            console.error('Shutdown error:', error);
-            process.exit(1);
-        });
+// Server initialization
+async function startServer() {
+    await connectToDatabase();
+    let server;
+
+    if (process.env.USE_HTTPS === 'true') {
+        try {
+            const httpsOptions = {
+                key: fs.readFileSync(path.resolve(process.env.SSL_KEY_PATH)),
+                cert: fs.readFileSync(path.resolve(process.env.SSL_CERT_PATH)),
+            };
+            server = https.createServer(httpsOptions, app);
+            console.log(`HTTPS server starting on port ${port}`);
+        } catch (error) {
+            console.warn('SSL setup failed. Falling back to HTTP:', error.message);
+            server = http.createServer(app); // Fallback to HTTP if SSL setup fails
+        }
     } else {
-        server.close(() => {
-            console.log('Server shut down.');
-            process.exit();
-        });
+        console.log('Starting HTTP server (HTTPS disabled or SSL files not found).');
+        server = http.createServer(app); // Explicitly use HTTP if USE_HTTPS is false
     }
-};
 
-process.on('SIGINT', gracefulShutdown);
-process.on('SIGTERM', gracefulShutdown);
+    server.listen(port, () => {
+        console.log(`Server running at http${process.env.USE_HTTPS === 'true' ? 's' : ''}://localhost:${port}`);
+    });
+}
+
+startServer();
