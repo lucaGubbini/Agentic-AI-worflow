@@ -1,5 +1,5 @@
 const express = require('express');
-const { createAgent, listAgents } = require('../controllers/agentController');
+const { createAgent, listAgents } = require('../../controllers/agentController');
 const router = express.Router();
 
 // Middleware to validate agent data

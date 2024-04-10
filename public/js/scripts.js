@@ -1,6 +1,7 @@
 class ChatInterface {
     constructor() {
         this.apiEndpoint = '/generate-code'; // Centralize API endpoint
+        this.saveChatEndpoint = '/chat/save-history'; // Endpoint for saving chat history
         this.bindEventListeners();
         this.isGeneratingCode = false;
     }
@@ -64,7 +65,7 @@ class ChatInterface {
 
     async handleGenerateCode() {
         const userPrompt = document.getElementById('userPrompt').value.trim();
-        const prompt = userPrompt || "make a simple code for calculating the area of a rectangle in python";
+        const prompt = userPrompt || "Enter your code generation prompt here...";
         if (!userPrompt) document.getElementById('userPrompt').value = prompt;
 
         this.clearAlert();
@@ -73,7 +74,7 @@ class ChatInterface {
         try {
             const data = await this.postRequest(this.apiEndpoint, { description: prompt });
             this.appendMessage(prompt, 'user-message');
-            this.appendMessage(data.generatedCode, 'ai-message');
+            this.appendMessage(data.code, 'ai-message'); // Ensure that the backend is sending 'code' key in response
         } catch (error) {
             // Error handling is managed within postRequest
         } finally {
@@ -93,7 +94,7 @@ class ChatInterface {
             .map(msgDiv => msgDiv.textContent)
             .join('\n');
         try {
-            const data = await this.postRequest('http://localhost:8001/save-chat', { chatHistory });
+            const data = await this.postRequest(this.saveChatEndpoint, { chatHistory });
             this.displayAlert(data.message, 'success');
         } catch (error) {
             // Error handling is managed within postRequest
